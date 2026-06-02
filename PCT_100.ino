@@ -8,6 +8,13 @@
 #include <DallasTemperature.h>
 #include <WiFi.h>
 #include <EEPROM.h>
+#include <FastLED.h>   // 新增WS2812驱动
+
+// ========== WS2812配置 ==========
+#define WS2812_PIN 0    // 原理图GPIO0(IO0)
+#define LED_NUM 1       // 单颗RGB灯
+CRGB rgbLed[LED_NUM];
+// ===============================
 
 #define ONE_WIRE_BUS 10
 OneWire oneWire(ONE_WIRE_BUS);
@@ -18,7 +25,7 @@ DallasTemperature sensors(&oneWire);
 U8G2_SH1106_128X64_VCOMH0_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
 #define LONG_PRESS_THRESHOLD 2000
-#define RESET_WIFI_LONG_PRESS 5000  // 长按5秒重置WiFi
+#define RESET_WIFI_LONG_PRESS 5000
 
 #define LIGHT_PIN 1
 #define LIGHT_THRESHOLD_LUX 300
@@ -55,7 +62,21 @@ void clearSerialBuffer() {
   while (Serial.available()) Serial.read();
 }
 
-// 保存WiFi
+// ========== RGB快捷函数 ==========
+void setRGB(uint8_t r,uint8_t g,uint8_t b){
+  rgbLed[0]=CRGB(r,g,b);
+  FastLED.show();
+}
+// 开机红绿交替闪烁
+void rgbBootBlink(){
+  for(uint8_t i=0;i<3;i++){
+    setRGB(255,0,0);delay(300);
+    setRGB(0,255,0);delay(300);
+  }
+  setRGB(0,0,0); // 熄灭
+}
+// =================================
+
 void saveWiFi(String ssid, String pwd) {
   EEPROM.write(EEPROM_FLAG_ADDR, WIFI_FLAG);
   for (int i = 0; i < ssid.length(); i++) EEPROM.write(EEPROM_SSID_ADDR + i, ssid[i]);
@@ -67,7 +88,6 @@ void saveWiFi(String ssid, String pwd) {
   Serial.flush();
 }
 
-// 读取WiFi
 bool loadWiFi() {
   if (EEPROM.read(EEPROM_FLAG_ADDR) != WIFI_FLAG) {
     Serial.println("ℹ️ 无保存WiFi，进入配网");
@@ -86,20 +106,18 @@ bool loadWiFi() {
   return true;
 }
 
-// 清除WiFi（重置配网）
 void clearWiFi() {
   EEPROM.write(EEPROM_FLAG_ADDR, 0x00);
   EEPROM.commit();
-  Serial.println("🗑️ 已清除WiFi信息，重启重新配网");
+  Serial.println("\n🗑️ 已清除WiFi信息，设备重启重新配网！");
   Serial.flush();
-  delay(300);
+  delay(800);
   ESP.restart();
 }
 
-// 扫描配网
 void startSmartConfig() {
   Serial.println("\n=====================================");
-  Serial.println("        扫描WiFi");
+  Serial.println("        扫描附近WiFi列表");
   Serial.println("=====================================\n");
   Serial.flush();
 
@@ -108,21 +126,21 @@ void startSmartConfig() {
   int n = WiFi.scanNetworks();
 
   if (n == 0) {
-    Serial.println("未找到WiFi");
+    Serial.println("未搜索到任何WiFi");
     while (1) delay(100);
   }
 
-  Serial.print("找到 "); Serial.print(n); Serial.println(" 个WiFi:");
+  Serial.print("共找到 "); Serial.print(n); Serial.println(" 个WiFi:");
   Serial.println("-------------------------------------");
   for (int i = 0; i < n; i++) {
     int rssi = WiFi.RSSI(i);
     int p = rssiToPercent(rssi);
     Serial.print(i+1); Serial.print(": ");
     Serial.print(WiFi.SSID(i));
-    Serial.print(" ["); Serial.print(p); Serial.println("%]");
+    Serial.print(" [信号"); Serial.print(p); Serial.println("%]");
   }
   Serial.println("-------------------------------------");
-  Serial.println("输入编号：");
+  Serial.println("请输入WiFi编号：");
   Serial.flush();
 
   while (!Serial.available()) delay(100);
@@ -131,23 +149,22 @@ void startSmartConfig() {
 
   if (sel >= 0 && sel < n) {
     targetSSID = WiFi.SSID(sel);
-    Serial.print("选择: "); Serial.println(targetSSID);
+    Serial.print("已选择: "); Serial.println(targetSSID);
     Serial.flush();
   } else {
-    Serial.println("错误！重启");
+    Serial.println("编号错误，重启设备");
     while (1) delay(100);
   }
 
-  Serial.println("输入密码：");
+  Serial.println("请输入WiFi密码：");
   Serial.flush();
   while (!Serial.available()) delay(100);
   targetPWD = Serial.readStringUntil('\n');
   targetPWD.trim();
 }
 
-// 连接WiFi
 bool connectWiFi() {
-  Serial.print("连接: "); Serial.println(targetSSID);
+  Serial.print("正在连接: "); Serial.println(targetSSID);
   Serial.flush();
   WiFi.begin(targetSSID.c_str(), targetPWD.c_str());
   int retry = 0;
@@ -163,11 +180,13 @@ bool connectWiFi() {
     Serial.print("IP: "); Serial.println(local_IP);
     Serial.print("信号: "); Serial.print(rssiToPercent(WiFi.RSSI())); Serial.println("%");
     Serial.flush();
+    setRGB(0,255,0); // 联网成功→绿色
     return true;
   } else {
     wifi_connected = false;
     Serial.println("\n❌ 连接失败！");
     Serial.flush();
+    setRGB(255,0,0); // 断网→红色
     return false;
   }
 }
@@ -175,6 +194,8 @@ bool connectWiFi() {
 void setup() {
   Serial.begin(115200);
   EEPROM.begin(EEPROM_SIZE);
+  FastLED.addLeds<WS2812,WS2812_PIN,GRB>(rgbLed,LED_NUM); // 初始化RGB
+  FastLED.clear();
   delay(500);
   Serial.println("\n=====================================");
   Serial.println("          系统启动");
@@ -191,11 +212,11 @@ void setup() {
   u8g2.enableUTF8Print();
   delay(200);
 
-  // 优先读Flash
+  rgbBootBlink(); // 开机红绿闪烁3次
+
   if (loadWiFi()) {
-    if (connectWiFi()) {
-      // 成功
-    } else {
+    if (!connectWiFi()) {
+      Serial.println("⚠️ 原有WiFi失效，进入配网");
       startSmartConfig();
       if (connectWiFi()) saveWiFi(targetSSID, targetPWD);
     }
@@ -227,57 +248,47 @@ void handle_key1() {
       function_mode = 0;
       Serial.println("[KEY1] 系统启动");
       Serial.flush();
+      setRGB(0,0,255); // 总闸开→蓝色
     } else {
       system_enabled = 0;
       Serial.println("[KEY1] 系统关闭");
       Serial.flush();
+      // 总闸关闭恢复WiFi指示灯
+      if(wifi_connected) setRGB(0,255,0);
+      else setRGB(255,0,0);
     }
   }
 }
 
 void handle_key2() {
-  static uint8_t last = 0;
-  static unsigned long t_press = 0;
-  static uint8_t long_flag = 0;
+  static uint8_t last_key = 0;
+  static unsigned long press_start = 0;
+  uint8_t curr = KEY2;
 
-  uint8_t current = KEY2;
-  if (current != last) {
-    last = current;
-    delay(20);
-    if (current == 1) {
-      t_press = millis();
-      long_flag = 0;
-    } else {
-      if (!long_flag && system_enabled && !auto_mode) {
-        function_mode = (function_mode + 1) % 4;
-        Serial.print("[KEY2] 手动模式: "); Serial.println(function_mode);
-        Serial.flush();
-      }
-    }
+  if (curr == 1 && last_key == 0) {
+    press_start = millis();
   }
-
-  if (current == 1 && system_enabled) {
-    unsigned long dur = millis() - t_press;
-
-    // 长按5秒 → 重置WiFi
-    if (dur >= RESET_WIFI_LONG_PRESS) {
-      long_flag = 1;
-      Serial.println("\n=====================================");
-      Serial.println("     长按5秒：重置WiFi");
-      Serial.println("=====================================\n");
+  if (curr == 0 && last_key == 1) {
+    unsigned long hold = millis() - press_start;
+    if (hold < LONG_PRESS_THRESHOLD && system_enabled && !auto_mode) {
+      function_mode = (function_mode + 1) % 4;
+      Serial.print("[KEY2] 手动档位：");
+      Serial.println(function_mode);
       Serial.flush();
-      clearWiFi(); // 清除并重启
     }
-
-    // 原来的长按2秒切换自动/手动
-    else if (dur >= LONG_PRESS_THRESHOLD && !long_flag) {
-      long_flag = 1;
+    else if (hold >= LONG_PRESS_THRESHOLD && hold < RESET_WIFI_LONG_PRESS) {
       auto_mode = !auto_mode;
-      if (auto_mode) Serial.println(">>> 自动模式");
-      else Serial.println(">>> 手动模式");
+      Serial.println(auto_mode ? ">>>切换自动模式" : ">>>切换手动模式");
       Serial.flush();
     }
   }
+  if (curr == 1) {
+    unsigned long hold = millis() - press_start;
+    if (hold >= RESET_WIFI_LONG_PRESS) {
+      clearWiFi();
+    }
+  }
+  last_key = curr;
 }
 
 void update_outputs() {
