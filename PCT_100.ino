@@ -10,11 +10,9 @@
 #include <EEPROM.h>
 #include <FastLED.h>
 
-// ========== WS2812配置 ==========
 #define WS2812_PIN 0
 #define LED_NUM 1
 CRGB rgbLed[LED_NUM];
-// ===============================
 
 #define ONE_WIRE_BUS 10
 OneWire oneWire(ONE_WIRE_BUS);
@@ -26,7 +24,6 @@ U8G2_SH1106_128X64_VCOMH0_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
 #define LONG_PRESS_THRESHOLD 2000
 #define RESET_WIFI_LONG_PRESS 5000
-
 #define LIGHT_PIN 1
 #define LIGHT_THRESHOLD_LUX 300
 #define LIGHT_HYSTERESIS 60
@@ -36,7 +33,6 @@ U8G2_SH1106_128X64_VCOMH0_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 uint8_t auto_mode = 1;
 float lastTempC = 0;
 static uint8_t led_state = LOW;
-
 static int light_readings[LIGHT_FILTER_SIZE] = {0};
 static int light_reading_index = 0;
 static unsigned long last_light_update = 0;
@@ -45,6 +41,11 @@ bool wifi_connected = false;
 IPAddress local_IP;
 String targetSSID = "";
 String targetPWD = "";
+
+const unsigned long SHOW_FAIL_TIME = 5000;
+unsigned long disconnectStartDisp = 0;
+bool wifiTryFinish = false;
+bool everConnected = false; //标记曾经成功连上WiFi
 
 #define EEPROM_SIZE 512
 #define EEPROM_FLAG_ADDR 0
@@ -62,37 +63,53 @@ void clearSerialBuffer() {
   while (Serial.available()) Serial.read();
 }
 
-// ========== RGB 函数 ==========
 void setRGB(uint8_t r, uint8_t g, uint8_t b) {
   rgbLed[0] = CRGB(r, g, b);
   FastLED.show();
 }
 
-// 开机红绿闪烁3次 → 熄灭
 void rgbBootBlink() {
   for (int i = 0; i < 3; i++) {
     setRGB(255, 0, 0); delay(300);
     setRGB(0, 255, 0); delay(300);
   }
-  setRGB(0, 0, 0); // 闪烁完熄灭
+  setRGB(0, 0, 0);
 }
 
-// WiFi 实时状态检测
 void checkWiFiStatus() {
   static unsigned long lastCheck = 0;
   if (millis() - lastCheck >= 1000) {
     lastCheck = millis();
-
     if (WiFi.status() == WL_CONNECTED) {
       wifi_connected = true;
-      setRGB(0, 255, 0);   // WiFi 正常 → 绿色
+      everConnected = true;
+      disconnectStartDisp = 0;
+      wifiTryFinish = false;
+      int rssiPer = rssiToPercent(WiFi.RSSI());
+      if(rssiPer >70) setRGB(0,255,0);
+      else if(rssiPer>30) setRGB(0,0,255);
+      else setRGB(255,255,0);
     } else {
-      wifi_connected = false;
-      setRGB(255, 0, 0);   // WiFi 断开 → 红色
+      setRGB(255, 0, 0);
+      //从未连上：直接退出，不重连
+      if(!everConnected) return;
+      //曾经连上过=中途掉线
+      if(wifiTryFinish) return;
+      if(disconnectStartDisp == 0){
+        disconnectStartDisp = millis();
+        Serial.println("WiFi掉线，尝试自动重连...");
+        WiFi.disconnect(true);
+        WiFi.mode(WIFI_STA);
+        delay(50);
+        WiFi.begin(targetSSID.c_str(),targetPWD.c_str());
+      }
+      if(millis()-disconnectStartDisp >= SHOW_FAIL_TIME){
+        wifiTryFinish = true;
+        Serial.println("WiFi连接超时，终止自动重连");
+      }
     }
   }
 }
-// ===============================
 
 void saveWiFi(String ssid, String pwd) {
   EEPROM.write(EEPROM_FLAG_ADDR, WIFI_FLAG);
@@ -137,16 +154,23 @@ void startSmartConfig() {
   Serial.println("        扫描附近WiFi列表");
   Serial.println("=====================================\n");
   Serial.flush();
-
+  u8g2.clearBuffer();
+  u8g2.setCursor(0, 28);
+  u8g2.print("正在扫描WiFi...");
+  u8g2.setCursor(0, 48);
+  u8g2.print("请稍候...");
+  u8g2.sendBuffer();
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   int n = WiFi.scanNetworks();
-
   if (n == 0) {
     Serial.println("未搜索到任何WiFi");
+    u8g2.clearBuffer();
+    u8g2.setCursor(0,28);
+    u8g2.print("未找到WiFi");
+    u8g2.sendBuffer();
     while (1) delay(100);
   }
-
   Serial.print("共找到 "); Serial.print(n); Serial.println(" 个WiFi:");
   Serial.println("-------------------------------------");
   for (int i = 0; i < n; i++) {
@@ -159,22 +183,33 @@ void startSmartConfig() {
   Serial.println("-------------------------------------");
   Serial.println("请输入WiFi编号：");
   Serial.flush();
-
+  u8g2.clearBuffer();
+  u8g2.setCursor(0, 28);
+  u8g2.print("扫描完成");
+  u8g2.setCursor(0, 48);
+  u8g2.print("串口输入编号");
+  u8g2.sendBuffer();
   while (!Serial.available()) delay(100);
   int sel = Serial.parseInt() - 1;
   clearSerialBuffer();
-
   if (sel >= 0 && sel < n) {
     targetSSID = WiFi.SSID(sel);
     Serial.print("已选择: "); Serial.println(targetSSID);
     Serial.flush();
   } else {
     Serial.println("编号错误，重启设备");
+    u8g2.clearBuffer();
+    u8g2.setCursor(0,28);
+    u8g2.print("编号错误");
+    u8g2.sendBuffer();
     while (1) delay(100);
   }
-
   Serial.println("请输入WiFi密码：");
   Serial.flush();
+  u8g2.clearBuffer();
+  u8g2.setCursor(0, 28);
+  u8g2.print("等待输入密码");
+  u8g2.sendBuffer();
   while (!Serial.available()) delay(100);
   targetPWD = Serial.readStringUntil('\n');
   targetPWD.trim();
@@ -183,6 +218,10 @@ void startSmartConfig() {
 bool connectWiFi() {
   Serial.print("正在连接: "); Serial.println(targetSSID);
   Serial.flush();
+  u8g2.clearBuffer();
+  u8g2.setCursor(0, 28);
+  u8g2.print("WiFi连接中...");
+  u8g2.sendBuffer();
   WiFi.begin(targetSSID.c_str(), targetPWD.c_str());
   int retry = 0;
   while (WiFi.status() != WL_CONNECTED && retry < 25) {
@@ -192,18 +231,27 @@ bool connectWiFi() {
   }
   if (WiFi.status() == WL_CONNECTED) {
     wifi_connected = true;
+    everConnected = true;
     local_IP = WiFi.localIP();
     Serial.println("\n✅ 连接成功！");
     Serial.print("IP: "); Serial.println(local_IP);
     Serial.print("信号: "); Serial.print(rssiToPercent(WiFi.RSSI())); Serial.println("%");
     Serial.flush();
-    setRGB(0,255,0);
+    u8g2.clearBuffer();
+    u8g2.setCursor(0,28);
+    u8g2.print("WiFi连接成功");
+    u8g2.sendBuffer();
+    delay(800);
     return true;
   } else {
     wifi_connected = false;
     Serial.println("\n❌ 连接失败！");
     Serial.flush();
-    setRGB(255,0,0);
+    u8g2.clearBuffer();
+    u8g2.setCursor(0,28);
+    u8g2.print("WiFi连接失败");
+    u8g2.sendBuffer();
+    delay(1200);
     return false;
   }
 }
@@ -218,31 +266,24 @@ void setup() {
   Serial.println("          系统启动");
   Serial.println("=====================================\n");
   Serial.flush();
-
   exit_init();
   sensors.begin();
   Wire.begin(I2C_SDA, I2C_SCL);
   u8g2.begin();
   u8g2.setContrast(0x60);
   u8g2.setPowerSave(0);
-  //【修改1：更换10号小字】
   u8g2.setFont(u8g2_font_wqy12_t_gb2312);
   u8g2.enableUTF8Print();
   delay(200);
-
-  rgbBootBlink(); // 开机闪烁
-
+  rgbBootBlink();
   if (loadWiFi()) {
     if (!connectWiFi()) {
-      Serial.println("⚠️ 原有WiFi失效，进入配网");
-      startSmartConfig();
-      if (connectWiFi()) saveWiFi(targetSSID, targetPWD);
+      Serial.println("⚠️ 原有WiFi失效，上电初次连网失败");
     }
   } else {
     startSmartConfig();
     if (connectWiFi()) saveWiFi(targetSSID, targetPWD);
   }
-
   Serial.println("\n等待 KEY1 启动系统...");
   Serial.flush();
 }
@@ -251,7 +292,7 @@ void loop() {
   handle_key1();
   handle_key2();
   update_outputs();
-  checkWiFiStatus();  // WiFi 实时检测
+  checkWiFiStatus();
   delay(10);
 }
 
@@ -278,10 +319,21 @@ void handle_key1() {
 void handle_key2() {
   static uint8_t last_key = 0;
   static unsigned long press_start = 0;
+  static bool longPressTriggered = false;
   uint8_t curr = KEY2;
-
   if (curr == 1 && last_key == 0) {
     press_start = millis();
+    longPressTriggered = false;
+  }
+  if (curr == 1) {
+    unsigned long hold = millis() - press_start;
+    if (hold >= LONG_PRESS_THRESHOLD && !longPressTriggered && system_enabled) {
+      longPressTriggered = true;
+      auto_mode = !auto_mode;
+      Serial.println(auto_mode ? ">>>切换自动模式" : ">>>切换手动模式");
+      Serial.flush();
+    }
+    if (hold >= RESET_WIFI_LONG_PRESS) clearWiFi();
   }
   if (curr == 0 && last_key == 1) {
     unsigned long hold = millis() - press_start;
@@ -290,17 +342,6 @@ void handle_key2() {
       Serial.print("[KEY2] 手动档位：");
       Serial.println(function_mode);
       Serial.flush();
-    }
-    else if (hold >= LONG_PRESS_THRESHOLD && hold < RESET_WIFI_LONG_PRESS) {
-      auto_mode = !auto_mode;
-      Serial.println(auto_mode ? ">>>切换自动模式" : ">>>切换手动模式");
-      Serial.flush();
-    }
-  }
-  if (curr == 1) {
-    unsigned long hold = millis() - press_start;
-    if (hold >= RESET_WIFI_LONG_PRESS) {
-      clearWiFi();
     }
   }
   last_key = curr;
@@ -321,34 +362,33 @@ void update_outputs() {
         Serial.print(" 温度:"); Serial.print(lastTempC, 1);
         Serial.println("");
         Serial.flush();
-
         u8g2.clearBuffer();
-        //【修改2：缩小行间距，5行坐标：10/22/34/46/58】
-        //第1行
         u8g2.setCursor(0,10);
         u8g2.print(auto_mode?"模式:自动  总闸:ON":"模式:手动  总闸:ON");
-        //第2行
         u8g2.setCursor(0,22);
         u8g2.print("光照:");u8g2.print((int)lux);u8g2.print(" / ");u8g2.print(LIGHT_THRESHOLD_LUX);
-        //第3行
         u8g2.setCursor(0,34);
         u8g2.print("温度:");u8g2.print(lastTempC,1);u8g2.print(" / ");u8g2.print(TEMP_THRESHOLD_C);
-        //第4行：灯光+风扇状态
         u8g2.setCursor(0,46);
         u8g2.print("灯光:");u8g2.print(led_state?"ON":"OFF");
         u8g2.setCursor(62,46);
         u8g2.print("风扇:");u8g2.print((lastTempC>TEMP_THRESHOLD_C)?"ON":"OFF");
-        //第5行：WiFi信息
         u8g2.setCursor(0,58);
         if(wifi_connected){
           u8g2.print("WiFi:");u8g2.print(local_IP.toString());
-          u8g2.setCursor(98,58);u8g2.print(rssiToPercent(WiFi.RSSI()));u8g2.print("%");
+          u8g2.print("   ");
+          u8g2.setCursor(105,58);u8g2.print(rssiToPercent(WiFi.RSSI()));u8g2.print("%");
         }else{
-          u8g2.print("WiFi:未连接");
+          if(!everConnected){
+            u8g2.print("WiFi:未连接");
+          }else if(wifiTryFinish){
+            u8g2.print("WiFi:连接超时重连失败");
+          }else{
+            u8g2.print("WiFi:重连中...");
+          }
         }
         u8g2.sendBuffer();
       }
-
       static float filtered_lux = 0;
       if (millis() - last_light_update >= 30) {
         last_light_update = millis();
@@ -359,33 +399,26 @@ void update_outputs() {
         int avg_lightVal = sum / LIGHT_FILTER_SIZE;
         filtered_lux = (float)(4095 - avg_lightVal) * (4095 - avg_lightVal) / 30000.0;
       }
-
       if (led_state == LOW) {
         if (filtered_lux < LIGHT_THRESHOLD_LUX) { LED(HIGH); led_state = HIGH; }
       } else {
         if (filtered_lux > LIGHT_THRESHOLD_LUX + LIGHT_HYSTERESIS) { LED(LOW); led_state = LOW; }
       }
       relay_control(lastTempC > TEMP_THRESHOLD_C ? HIGH : LOW);
-    }
-    else
-    {
+    }else{
       static unsigned long lastDisp = 0;
       if (millis() - lastDisp >= 1000) {
         lastDisp = millis();
         u8g2.clearBuffer();
-        //第1行
         u8g2.setCursor(0,10);
         u8g2.print("模式:手动  总闸:ON");
-        //第2行
         int v = analogRead(LIGHT_PIN);
         int inv = 4095 - v;
         float lx = (float)inv * inv / 30000.0;
         u8g2.setCursor(0,22);
         u8g2.print("光照:");u8g2.print((int)lx);u8g2.print(" / ");u8g2.print(LIGHT_THRESHOLD_LUX);
-        //第3行
         u8g2.setCursor(0,34);
         u8g2.print("温度:");u8g2.print(lastTempC,1);u8g2.print(" / ");u8g2.print(TEMP_THRESHOLD_C);
-        //第4行：灯光、风扇
         u8g2.setCursor(0,46);
         char lampStr[5],fanStr[5];
         switch(function_mode){
@@ -397,17 +430,22 @@ void update_outputs() {
         u8g2.print("灯光:");u8g2.print(lampStr);
         u8g2.setCursor(62,46);
         u8g2.print("风扇:");u8g2.print(fanStr);
-        //第5行WiFi
         u8g2.setCursor(0,58);
         if (wifi_connected) {
           u8g2.print("WiFi:"); u8g2.print(local_IP.toString());
-          u8g2.setCursor(98,58); u8g2.print(rssiToPercent(WiFi.RSSI())); u8g2.print("%");
+          u8g2.print("   ");
+          u8g2.setCursor(105,58); u8g2.print(rssiToPercent(WiFi.RSSI())); u8g2.print("%");
         } else {
-          u8g2.print("WiFi:未连接");
+          if(!everConnected){
+            u8g2.print("WiFi:未连接");
+          }else if(wifiTryFinish){
+            u8g2.print("WiFi:连接超时重连失败");
+          }else{
+            u8g2.print("WiFi:重连中...");
+          }
         }
         u8g2.sendBuffer();
       }
-
       switch (function_mode) {
         case 0: LED(LOW);  relay_control(LOW);  break;
         case 1: LED(LOW);  relay_control(HIGH); break;
