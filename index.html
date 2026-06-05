@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCT_100化工控制实训装置｜产品说明书</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",sans-serif;}
+        body{background:#f5f7fa;color:#333;line-height:1.7;}
+        header{background:#165DFF;color:#fff;padding:60px 20px;text-align:center;}
+        h1{font-size:36px;margin-bottom:12px;}
+        .ver{opacity:0.8;font-size:16px;}
+        nav{background:#fff;box-shadow:0 2px 8px #eee;position:sticky;top:0;z-index:99;}
+        nav ul{display:flex;list-style:none;max-width:1200px;margin:0 auto;}
+        nav li a{display:block;padding:18px 22px;text-decoration:none;color:#333;font-weight:500;}
+        nav li a:hover{color:#165DFF;}
+        .container{max-width:1200px;margin:0 auto;padding:50px 20px;}
+        section{margin-bottom:60px;}
+        h2{border-left:5px solid #165DFF;padding-left:12px;margin-bottom:25px;font-size:26px;color:#222;}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
+        .card{background:#fff;padding:25px;border-radius:8px;box-shadow:0 1px 12px #e9edf5;}
+        h3{color:#165DFF;margin-bottom:12px;}
+        table{width:100%;border-collapse:collapse;background:#fff;margin-top:15px;}
+        td,th{border:1px solid #ddd;padding:12px;}
+        th{background:#f0f6ff;}
+        footer{background:#112851;color:#fff;text-align:center;padding:30px;}
+    </style>
+</head>
+<body>
+<header>
+    <h1>PCT_100 化工过程控制实训装置</h1>
+    <div class="ver">产品版本：V1.6 | 项目编号：PCT_100_28</div>
+</header>
+<nav>
+    <ul>
+        <li><a href="#intro">产品概述</a></li>
+        <li><a href="#hard">硬件组成</a></li>
+        <li><a href="#func">核心功能</a></li>
+        <li><a href="#param">技术参数</a></li>
+        <li><a href="#dev">开发资料</a></li>
+    </ul>
+</nav>
+<div class="container">
+    <section id="intro">
+        <h2>产品概述</h2>
+        <p>PCT_100化工控制实训装置是面向化工自动化、过程控制、机电一体化专业的教学实训设备，对标工业现场液位、继电器开关、数字按键测控场景，基于Arduino架构开发，搭载WiFi+MQTT物联网远程控制，配套LED指示、继电器执行机构、双按键手动输入模块，可完成单回路化工控制实训、设备故障调试、远程云端数据采集实验。适用于高校实训教学、技能考核、自动化课程配套实验。</p>
+    </section>
+
+    <section id="hard">
+        <h2>硬件组成（配套源码：led/key/relay/exit驱动）</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>IO硬件配置</h3>
+                <p>1. LED指示灯：6号引脚，电源状态、动作反馈</p>
+                <p>2. 按键模块：KEY1(20)、KEY2(21)，手动启停/模式切换</p>
+                <p>3. 继电器：7号引脚，化工阀门、泵体模拟输出控制</p>
+            </div>
+            <div class="card">
+                <h3>通讯配置</h3>
+                <p>WiFi：接入路由器（Pura 70），MQTT远程上云</p>
+                <p>MQTT服务器：47.98.170.18:8081，设备唯一ID：PCT_100_28</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="func">
+        <h2>核心实训功能</h2>
+        <ul style="padding-left:22px;">
+            <li>手动按键启停系统：KEY1触发系统使能，KEY2切换工作模式</li>
+            <li>继电器闭环控制：软件控制通断，模拟化工泵、调节阀启停</li>
+            <li>LED状态指示：设备运行、故障、开关状态可视化提示</li>
+            <li>MQTT云端远程控制：手机/上位机远程下发指令控制继电器与系统启停</li>
+            <li>多模式实训：本地手动控制 + 物联网远程控制双工作模式</li>
+        </ul>
+    </section>
+
+    <section id="param">
+        <h2>整机技术参数</h2>
+        <table>
+            <tr><th>项目</th><th>参数规格</th></tr>
+            <tr><td>设备版本</td><td>V1.6</td></tr>
+            <tr><td>主控架构</td><td>Arduino</td></tr>
+            <tr><td>输入按键</td><td>2路数字输入（20/21引脚）</td></tr>
+            <tr><td>开关输出</td><td>1路继电器(7脚)+1路LED(6脚)</td></tr>
+            <tr><td>通讯方式</td><td>WiFi+MQTT TCP</td></tr>
+            <tr><td>适用场景</td><td>化工过程控制实训、自动化仪表教学</td></tr>
+        </table>
+    </section>
+
+    <section id="dev">
+        <h2>开发源码资料</h2>
+        <p>项目开源代码已托管Github：包含led.cpp、key.cpp、relay.cpp、exit.cpp全套底层驱动、WiFi密钥配置、版本配置文件。</p>
+        <p>源码目录：IO驱动文件 + 系统逻辑 + MQTT配置secrets.h + version版本管理</p>
+    </section>
+</div>
+<footer>
+    ©2026 PCT_100_CTL化工实训装置 | 产品作者：md
+</footer>
+</body>
+</html>
