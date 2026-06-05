@@ -6,27 +6,41 @@
 <title>技术原理|PCT100化工实训装置</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;scroll-behavior:smooth;}
-:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;}
-body{background:#0f1822;color:var(--text);}
-.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;}
+:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;--bg:#0f1822;}
+.light{--bg:#f3f7f9;--dark:#ffffff;--card:#ffffff;--text:#222222;}
+body{background:var(--bg);color:var(--text);transition:0.4s;}
+.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;}
 .top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
+.light .top-nav a{color:#333;}
 .top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
+#theme{margin-left:auto;background:#009955;border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;}
 .container{max-width:1200px;margin:0 auto;padding:55px 30px;}
 .content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;}
 .content-box:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.25);}
-.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:#fff;}
+.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:var(--text);}
 .img-box{width:100%;height:250px;border-radius:10px;margin:20px 0;object-fit:cover;}
 footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
+.light footer{color:#444;}
 #toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
+#timeBox{position:fixed;right:30px;bottom:90px;color:var(--text);background:var(--card);padding:8px 12px;border-radius:8px;font-size:14px;}
+.pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#222;padding:30px;border-radius:12px;z-index:9999;display:none;box-shadow:0 0 30px #0003;}
+.pop button{margin-top:15px;background:#009955;border:none;color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;}
 </style>
 </head>
 <body>
+
+<div class="pop" id="welcome">
+    <h3>PCT100 技术原理说明</h3>
+    <p>硬件IO + MQTT物联网双模式控制</p>
+    <button onclick="document.getElementById('welcome').style.display='none'">确定</button>
+</div>
 
 <div class="top-nav">
     <a href="index.html">首页</a>
     <a href="product.html">产品说明书</a>
     <a href="tech.html">技术原理</a>
     <a href="about.html">关于项目</a>
+    <button id="theme">切换浅色/深色</button>
 </div>
 
 <div class="container">
@@ -52,9 +66,13 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
 </div>
 
 <button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
+<div id="timeBox">页面已运行：<span id="sec">0</span> s</div>
 <footer>©2026 PCT100化工实训装置 | 技术原理文档</footer>
 
 <script>
+window.onload=()=>document.getElementById("welcome").style.display="block";
+document.getElementById("theme").onclick=()=>document.body.classList.toggle("light");
+let s=0;setInterval(()=>{s++;document.getElementById("sec").innerText=s},1000);
 window.onscroll=()=>{document.getElementById("toTop").style.display=window.scrollY>300?"block":"none";}
 </script>
 </body>

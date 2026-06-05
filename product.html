@@ -6,36 +6,54 @@
 <title>产品说明书|PCT100化工实训装置</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;scroll-behavior:smooth;}
-:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;--active:#00aa60;}
-body{background:#0f1822;color:var(--text);display:flex;}
+:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;--active:#00aa60;--bg:#0f1822;}
+.light{--bg:#f3f7f9;--dark:#fff;--card:#fff;--text:#222;}
+body{background:var(--bg);color:var(--text);display:flex;transition:0.4s;}
 .sidebar{width:260px;background:var(--dark);height:100vh;position:fixed;padding:35px 20px;}
 .sidebar h2{color:#58ffaa;font-size:21px;border-bottom:1px solid #2c3c4d;padding-bottom:14px;margin-bottom:30px;}
+.light .sidebar h2{color:#009955;}
 .sidebar ul{list-style:none;}
 .sidebar li{margin:10px 0;}
 .sidebar a{display:block;padding:11px 14px;border-radius:8px;color:#b9c8d8;text-decoration:none;transition:0.3s;}
+.light .sidebar a{color:#333;}
 .sidebar a:hover{background:#274b3c;color:#fff;}
 .sidebar a.active{background:var(--active);color:#fff;}
 .main-wrap{margin-left:260px;width:calc(100% - 260px);}
-.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;}
+.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;}
 .top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
+.light .top-nav a{color:#333;}
 .top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
-.banner{background:linear-gradient(120deg,#153b30,#0c5942);padding:60px 40px;text-align:center;}
-.banner h1{font-size:38px;color:#58ffaa;}
+#theme{margin-left:auto;background:#009955;border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;}
+.banner{background:linear-gradient(120deg,#153b30,#0c5942);padding:60px 40px;text-align:center;color:#fff;}
 .container{max-width:1200px;margin:0 auto;padding:50px 30px;}
-.content-box{background:var(--card);padding:34px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;}
+.content-box{background:var(--card);padding:34px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;box-shadow:0 2px 8px #00000012;}
 .content-box:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.25);}
-.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:#fff;}
+.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:var(--text);}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:30px;}
 table{width:100%;border-collapse:collapse;margin-top:16px;}
 th,td{border:1px solid #334558;padding:13px;color:#d1dde8;}
+.light th,.light td{color:#222;border:#ddd;}
 th{background:#1f3d32;color:#58ffaa;}
+.light th{background:#e6f9ef;color:#009955;}
 tr:hover{background:#253240;}
-.hl{color:#58ffaa;font-weight:bold;}
+.light tr:hover{background:#f0f9f5;}
+.hl{color:#58ffaa;font-weight:bold;position:relative;cursor:help;}
+.light .hl{color:#009955;}
+.hl:hover::after{content:attr(data-tip);position:absolute;left:0;top:120%;background:#111;color:#fff;padding:6px 10px;border-radius:5px;white-space:nowrap;z-index:99;}
 footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
+.light footer{color:#333;}
 #toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
+#timeBox{position:fixed;right:30px;bottom:90;color:var(--text);background:var(--card);padding:8px 12px;border-radius:8px;font-size:14px;box-shadow:0 2px 10px #0002;}
+.pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#222;padding:30px;border-radius:12px;z-index:9999;display:none;box-shadow:0 0 30px #0003;text-align:center;}
+.pop button{margin-top:15px;background:#009955;border:none;color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;}
 </style>
 </head>
 <body>
+<div class="pop" id="welcome">
+    <h3>欢迎查阅PCT100产品说明书V1.6</h3>
+    <p>设备ID：PCT_100_28</p>
+    <button onclick="document.getElementById('welcome').style.display='none'">开始浏览</button>
+</div>
 
 <div class="sidebar">
     <h2>产品说明书目录</h2>
@@ -57,6 +75,7 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
         <a href="product.html">产品说明书</a>
         <a href="tech.html">技术原理</a>
         <a href="about.html">关于项目</a>
+        <button id="theme">切换浅色/深色</button>
     </div>
     <div class="banner">
         <h1>PCT_100化工控制实训装置 · 产品说明书 V1.6</h1>
@@ -73,15 +92,15 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
                 <div>
                     <h3 style="color:#58ffaa;margin-bottom:12px;">IO外设配置</h3>
                     <ul style="padding-left:22px;line-height:2;">
-                        <li>LED状态指示灯：<span class="hl">引脚6</span></li>
-                        <li>KEY1：<span class="hl">引脚20</span>（系统启停）</li>
-                        <li>KEY2：<span class="hl">引脚21</span>（模式切换）</li>
-                        <li>RELAY：<span class="hl">引脚7</span>（泵阀模拟）</li>
+                        <li>LED状态指示灯：<span class="hl" data-tip>单片机数字输出引脚，控制指示灯</span>引脚6</li>
+                        <li>KEY1：<span class="hl" data-tip>系统启停输入引脚</span>引脚20</li>
+                        <li>KEY2：<span class="hl" data-tip>模式切换输入引脚</span>引脚21</li>
+                        <li>RELAY：<span class="hl" data-tip>继电器驱动输出引脚</span>引脚7</li>
                     </ul>
                 </div>
                 <div>
                     <h3 style="color:#58ffaa;margin-bottom:12px;">物联网通讯配置</h3>
-                    <p>MQTT服务器：<span class="hl">47.98.170.18:8081</span><br>设备ID：<span class="hl">PCT_100_28</span></p>
+                    <p>MQTT服务器：<span class="hl" data-tip>公网云端MQTT服务地址</span>47.98.170.18:8081<br>设备ID：<span class="hl" data-tip>设备唯一编号，区分多台实训设备</span>PCT_100_28</p>
                 </div>
             </div>
         </section>
@@ -148,10 +167,17 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
     </div>
 
     <button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
+    <div id="timeBox">页面已运行：<span id="sec">0</span> s</div>
     <footer>©2026 PCT100化工实训装置 | 官方产品说明书</footer>
 </div>
 
 <script>
+window.onload=()=>document.getElementById("welcome").style.display="block";
+//换肤
+document.getElementById("theme").onclick=()=>document.body.classList.toggle("light");
+//计时
+let s=0;setInterval(()=>{s++;document.getElementById("sec").innerText=s},1000);
+//侧边栏滚动高亮
 const links=document.querySelectorAll(".sidebar a");
 const sections=document.querySelectorAll("section");
 window.onscroll=()=>{
