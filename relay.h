@@ -7,5 +7,6 @@
 
 void relay_init(void);
 void relay_control(uint8_t state);
+uint8_t relay_get_state(void);
 
 #endif
