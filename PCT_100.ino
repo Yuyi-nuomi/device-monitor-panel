@@ -295,17 +295,18 @@ void update_outputs();
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
+#include "secrets.h"  // 敏感信息放在这里
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 Preferences prefs;
 
-// 【固定你的 8081 端口，不改了！】
-String mqttServer = "47.98.170.18";
-int mqttPort = 8081;
-String mqttUser = "dzdx_emqx";
-String mqttPass = "Jp4!sQ7$";
-String deviceId = "PCT_100_28";
+// 从 secrets.h 读取配置
+String mqttServer = String(MQTT_SERVER);
+int mqttPort = MQTT_PORT;
+String mqttUser = String(MQTT_USER);
+String mqttPass = String(MQTT_PASS);
+String deviceId = String(DEVICE_ID);
 String pubTopic, subTopic;
 
 unsigned long lastMqttReconnect = 0;
