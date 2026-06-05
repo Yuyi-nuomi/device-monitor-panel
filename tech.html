@@ -6,54 +6,44 @@
 <title>技术原理|PCT100化工实训装置</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
-:root{--main:#0b53c7;--light:#e6f0ff;--dark:#083b89;--gray:#f6f8fc;}
-body{background:var(--gray);color:#222;}
-.topnav{background:var(--main);display:flex;gap:36px;padding:18px 40px;position:sticky;top:0;z-index:999;}
-.topnav a{color:#fff;text-decoration:none;font-size:17px;padding:7px 12px;border-radius:6px;transition:0.25s;}
-.topnav a:hover{background:var(--dark);}
-.container{max-width:1220px;margin:0 auto;padding:60px 22px;}
-.title-block{border-left:7px solid var(--main);padding-left:16px;font-size:28px;margin:40px 0 22px;}
-.content-box{background:#fff;padding:35px;border-radius:12px;box-shadow:0 3px 15px #e4ebf8;margin-bottom:35px;line-height:1.85;font-size:16px;}
-footer{background:var(--dark);color:#fff;text-align:center;padding:32px;margin-top:60px;font-size:15px;}
-.img-item{width:100%;height:260px;border-radius:10px;margin:20px 0;object-fit:cover;}
+:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;}
+body{background:#0f1822;color:var(--text);}
+.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;}
+.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;}
+.top-nav a:hover{background:var(--main);color:#fff;}
+.container{max-width:1200px;margin:0 auto;padding:55px 30px;}
+.content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;}
+.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:#fff;}
+.img-box{width:100%;height:250px;border-radius:10px;margin:20px 0;object-fit:cover;}
+footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
 </style>
 </head>
 <body>
-<div class="topnav">
+<div class="top-nav">
     <a href="index.html">首页</a>
     <a href="product.html">产品说明书</a>
     <a href="tech.html">技术原理</a>
     <a href="about.html">关于项目</a>
 </div>
 <div class="container">
-    <h1 style="text-align:center;color:var(--main);margin-bottom:50px;">PCT_100整机控制技术原理详解</h1>
-    <img class="img-item" src="https://img0.baidu.com/it/u=3213211567,3089124303&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=320" alt="化工控制原理图">
+    <h1 style="text-align:center;color:#58ffaa;margin-bottom:40px;font-size:32px;">PCT_100整机控制技术原理详解</h1>
+    <img class="img-box" src="images/flow.png" alt="控制流程图">
 
-    <h2 class="title-block">一、整机闭环控制总体原理</h2>
     <div class="content-box">
-        <p>设备遵循工业PLC开关控制逻辑：<b>按键信号采集→主控逻辑运算→输出驱动继电器+状态反馈LED</b>。本地控制由物理按键作为输入源；远程控制由MQTT云端下发指令作为输入源，两种输入源共用同一套输出逻辑，实现双源控制一套执行机构，完全复刻真实化工车间泵阀控制系统。</p>
-        <p style="margin-top:12px;">主程序采用循环轮询机制，不间断扫描按键电平与WiFi接收缓冲区，实时刷新设备运行状态，保证输入指令毫秒级响应。</p>
+        <h2 class="title-h2">一、整机闭环控制总体原理</h2>
+        <p>设备完全复刻工业PLC开关控制链路：<b>按键信号采集→主控逻辑运算→继电器输出+LED状态反馈</b>。本地输入来自物理按键，远程输入来自MQTT云端报文，两路输入共用同一套输出执行逻辑，实现双源控制单负载，贴合真实化工车间泵阀控制系统设计思路。主程序采用循环轮询机制，实时扫描按键电平与WiFi接收缓冲区，指令响应毫秒级。</p>
     </div>
-
-    <h2 class="title-block">二、按键采集电路与软件原理</h2>
     <div class="content-box">
-        <p>硬件采用上拉输入接法，按键按下时IO引脚由高电平变为低电平；软件做延时消抖处理，过滤机械按键抖动带来的误触发信号。驱动文件独立封装按键扫描函数，只对外提供获取按键状态接口，业务层无需关注底层电平细节，符合软件工程分层思想。</p>
-        <ul style="padding-left:22px;line-height:2;margin-top:12px;">
-            <li>KEY1：短按触发系统使能标志位，系统从休眠进入运行状态</li>
-            <li>KEY2：短按翻转运行模式标志位，在本地/远程模式之间切换</li>
-        </ul>
+        <h2 class="title-h2">二、按键硬件与软件采集原理</h2>
+        <p>硬件采用IO上拉输入电路，按键按下引脚电平由高变低；软件添加延时消抖算法，过滤机械按键抖动误触发。驱动分层封装按键扫描函数，上层业务无需关注底层电平细节，符合软件工程高内聚低耦合设计思想。KEY1负责系统使能标志位、KEY2负责模式切换标志位。</p>
     </div>
-
-    <h2 class="title-block">三、继电器与LED驱动原理</h2>
     <div class="content-box">
-        <p>主控IO输出高低电平驱动三极管，进而控制继电器线圈通断电，实现无源触点开合，外接负载模拟化工电磁阀、离心泵。LED与继电器状态绑定：继电器闭合LED常亮、断开LED熄灭，故障状态下LED周期性闪烁，实现状态可视化。</p>
-        <p style="margin-top:12px;">驱动代码将继电器开关动作封装成独立函数，上层业务只需调用openRelay()/closeRelay()即可，降低后期代码维护难度。</p>
+        <h2 class="title-h2">三、继电器与LED驱动原理</h2>
+        <p>主控IO电平驱动三极管导通/截止，控制继电器线圈供电，无源触点通断外接负载，模拟化工离心泵、电磁阀启停；LED与继电器状态绑定，闭合常亮、断开熄灭，故障状态高频闪烁，实现设备状态全可视化。</p>
     </div>
-
-    <h2 class="title-block">四、MQTT物联网通讯原理</h2>
     <div class="content-box">
-        <p>设备上电后WiFi自动连接局域网，TCP链路连接公网MQTT broker服务器，订阅专属控制主题、发布设备状态主题。云端下发控制报文时，设备解析报文内容，转化为继电器开关指令；设备本地状态发生变化时，主动上传状态数据包至服务器，实现双向全双工通讯。</p>
-        <p style="margin-top:12px;">MQTT采用发布/订阅模型，是目前工业物联网主流通讯协议，低带宽、高可靠，广泛用于化工现场设备远程运维。</p>
+        <h2 class="title-h2">四、MQTT物联网通讯原理</h2>
+        <p>设备上电自动连接WiFi，TCP长连接接入公网MQTT Broker，订阅专属控制主题、发布设备状态主题。云端下发控制报文→设备解析指令→驱动外设；设备状态变动→主动上传数据包至服务器，采用发布订阅模型，是目前工业物联网主流低功耗通讯方案。</p>
     </div>
 </div>
 <footer>©2026 PCT100化工实训装置 | 技术原理文档</footer>

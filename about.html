@@ -6,55 +6,50 @@
 <title>关于项目|PCT100化工实训装置</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
-:root{--main:#0b53c7;--light:#e6f0ff;--dark:#083b89;--gray:#f6f8fc;}
-body{background:var(--gray);color:#222;}
-.topnav{background:var(--main);display:flex;gap:36px;padding:18px 40px;position:sticky;top:0;z-index:999;}
-.topnav a{color:#fff;text-decoration:none;font-size:17px;padding:7px 12px;border-radius:6px;transition:0.25s;}
-.topnav a:hover{background:var(--dark);}
-.container{max-width:1220px;margin:0 auto;padding:60px 22px;}
-.title-block{border-left:7px solid var(--main);padding-left:16px;font-size:28px;margin:40px 0 22px;}
-.content-box{background:#fff;padding:35px;border-radius:12px;box-shadow:0 3px 15px #e4ebf8;margin-bottom:35px;line-height:1.85;font-size:16px;}
-footer{background:var(--dark);color:#fff;text-align:center;padding:32px;margin-top:60px;font-size:15px;}
-.img-item{width:100%;height:260px;border-radius:10px;margin:20px 0;object-fit:cover;}
+:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;}
+body{background:#0f1822;color:var(--text);}
+.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;}
+.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;}
+.top-nav a:hover{background:var(--main);color:#fff;}
+.container{max-width:1200px;margin:0 auto;padding:55px 30px;}
+.content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;}
+.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:#fff;}
+.img-box{width:100%;height:250px;border-radius:10px;margin:20px 0;object-fit:cover;}
+footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
 </style>
 </head>
 <body>
-<div class="topnav">
+<div class="top-nav">
     <a href="index.html">首页</a>
     <a href="product.html">产品说明书</a>
     <a href="tech.html">技术原理</a>
     <a href="about.html">关于项目</a>
 </div>
 <div class="container">
-    <h1 style="text-align:center;color:var(--main);margin-bottom:50px;">项目介绍与开发说明</h1>
-    <img class="img-item" src="https://img2.baidu.com/it/u=1892356123,3256987411&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=320" alt="实训实验室场景">
-
-    <h2 class="title-block">一、项目开发背景</h2>
+    <h1 style="text-align:center;color:#58ffaa;margin-bottom:40px;font-size:32px;">项目开发与应用介绍</h1>
+    <img class="img-box" src="images/device1.jpg" alt="实训设备实物">
     <div class="content-box">
-        <p>当前高校化工自动化实训缺少低成本小型化工控制系统教具，大型工业实训设备造价昂贵、体积庞大无法进入课堂，本项目基于低成本Arduino硬件，打造微型化工过程控制实训台，用百元级成本复刻工业控制逻辑，满足日常课堂实操需求。项目从硬件选型、底层驱动、物联网对接、前端产品网站全流程自主完成。</p>
+        <h2 class="title-h2">一、项目开发背景</h2>
+        <p>传统高校化工自动化实训大型工业设备采购成本高、体积庞大无法搬进常规教室，本项目依托低成本Arduino硬件，自主开发微型化工过程控制实训台，百元成本复刻工业控制逻辑，填补小型课堂实训教具空缺，软硬件全自主开发。</p>
     </div>
-
-    <h2 class="title-block">二、项目课程应用范围</h2>
     <div class="content-box">
+        <h2 class="title-h2">二、课程适用范围</h2>
         <ul style="padding-left:22px;line-height:2;">
-            <li>《过程控制工程》：泵阀启停控制、开关量闭环控制实训</li>
-            <li>《物联网应用技术》：MQTT协议、WiFi组网、云端远程控制实训</li>
-            <li>《单片机与嵌入式开发》：IO驱动分层编程、模块化代码规范实训</li>
-            <li>《化工仪表及自动化》：现场仪表逻辑与故障排查实训</li>
+            <li>《过程控制工程》：泵阀开关闭环控制实训</li>
+            <li>《物联网应用》：MQTT协议、WiFi远程测控实训</li>
+            <li>《嵌入式开发》：模块化C/C++分层编程实训</li>
+            <li>《化工仪表自动化》：仪表故障排查实操实训</li>
         </ul>
     </div>
-
-    <h2 class="title-block">三、项目开发内容与分工</h2>
     <div class="content-box">
-        <p>项目整体分为四大开发模块：硬件电路设计、底层C/C++驱动开发、MQTT物联网对接、静态产品网站开发。</p>
-        <p style="margin-top:12px;">硬件部分：确定引脚分配、元器件选型；软件部分：分文件编写LED/KEY/RELAY驱动与主逻辑；网页部分：制作4页面互通官网，部署至Github Pages作为在线产品手册。项目全部代码开源托管于Github仓库。</p>
+        <h2 class="title-h2">三、项目开发分工</h2>
+        <p>项目分四大开发模块：硬件引脚规划与元器件选型、底层外设驱动编程、MQTT物联网对接、静态多页面产品官网开发。全部源码开源托管Github，网页依托Github Pages永久免费部署。</p>
     </div>
-
-    <h2 class="title-block">四、开源与版权说明</h2>
     <div class="content-box">
-        <p>本项目所有硬件源码、前端网页代码全部开源免费，仅供教学实训学习使用，禁止商用售卖。仓库持续迭代更新固件版本，当前稳定版本V1.6，后续会新增模拟液位采集、PID闭环控制拓展功能。本在线网站永久依托Github Pages免费部署，随时在线查阅产品手册。</p>
+        <h2 class="title-h2">四、开源版权说明</h2>
+        <p>本项目所有硬件源码、前端网页代码开源免费，仅限高校教学学习使用，禁止商用售卖。固件持续迭代优化，当前稳定版本V1.6，后续拓展PID液位闭环控制功能。</p>
     </div>
 </div>
-<footer>©2026 PCT100化工实训装置 | 项目开发文档</footer>
+<footer>©2026 PCT100化工实训装置 | 开源项目说明</footer>
 </body>
 </html>
