@@ -37,15 +37,36 @@ th{background:#1f3d32;color:#58ffaa;}
 .light th{background:#e6f9ef;color:#009955;}
 tr:hover{background:#253240;}
 .light tr:hover{background:#f0f9f5;}
-/*悬停提示样式【修复竖排文字bug】*/
-.hl{color:#58ffaa;font-weight:bold;position:relative;cursor:help;display:inline-block;white-space:nowrap;}
-.light .hl{color:#009955;}
-.hl::after{content:attr(data-tip);position:absolute;left:0;top:125%;background:#111;color:#fff;padding:8px 12px;border-radius:6px;white-space:normal;max-width:340px;z-index:999;display:none;}
-.hl:hover::after{display:block;}
+/* 修复后的悬停提示样式 */
+.hl {
+    color: #58ffaa;
+    font-weight: bold;
+    position: relative;
+    cursor: help;
+    display: inline-block;
+    white-space: nowrap;
+}
+.light .hl {
+    color: #009955;
+}
+.hl:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 0;
+    top: 125%;
+    background: #111;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: normal;
+    max-width: 340px;
+    z-index: 999;
+    display: block;
+}
 footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
 .light footer{color:#333;}
 #toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
-#timeBox{position:fixed;right:30px;bottom:90;color:var(--text);background:var(--card);padding:8px 12px;border-radius:8px;font-size:14px;box-shadow:0 2px 10px #0002;}
+#timeBox{position:fixed;right:30px;bottom:90px;color:var(--text);background:var(--card);padding:8px 12px;border-radius:8px;font-size:14px;box-shadow:0 2px 10px #0002;}
 .pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#222;padding:30px;border-radius:12px;z-index:9999;display:none;box-shadow:0 0 30px #0003;text-align:center;}
 .pop button{margin-top:15px;background:#009955;border:none;color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;}
 </style>
@@ -94,15 +115,15 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
                 <div>
                     <h3 style="color:#58ffaa;margin-bottom:12px;">IO外设配置</h3>
                     <ul style="padding-left:22px;line-height:2;">
-                        <li>LED状态指示灯：引脚6 <span class="hl" data-tip="单片机数字输出引脚，高电平点亮指示灯，低电平熄灭">引脚6</span></li>
-                        <li>KEY1：引脚20 <span class="hl" data-tip>系统启停输入引脚，按键按下拉低电平触发开机</span></li>
-                        <li>KEY2：引脚21 <span class="hl" data-tip>工作模式切换引脚，切换本地/远程控制模式</span></li>
-                        <li>RELAY：引脚7 <span class="hl" data-tip>继电器驱动输出引脚，控制外接电磁阀、化工泵启停</span></li>
+                        <li>LED状态指示灯：<span class="hl" data-tip="单片机数字输出引脚，高电平点亮指示灯，低电平熄灭">引脚6</span></li>
+                        <li>KEY1：<span class="hl" data-tip="系统启停输入引脚，按键按下拉低电平触发开机">引脚20</span></li>
+                        <li>KEY2：<span class="hl" data-tip="工作模式切换引脚，切换本地/远程控制模式">引脚21</span></li>
+                        <li>RELAY：<span class="hl" data-tip="继电器驱动输出引脚，控制外接电磁阀、化工泵启停">引脚7</span></li>
                     </ul>
                 </div>
                 <div>
                     <h3 style="color:#58ffaa;margin-bottom:12px;">物联网通讯配置</h3>
-                    <p>MQTT服务器：<span class="hl" data-tip>公网云端MQTT服务地址，设备联网后自动接入接收远程指令">47.98.170.18:8081</span><br>设备ID：<span class="hl" data-tip>设备唯一编号，多台实训设备区分标识">PCT_100_28</span></p>
+                    <p>MQTT服务器：<span class="hl" data-tip="公网云端MQTT服务地址，设备联网后自动接入接收远程指令">47.98.170.18:8081</span><br>设备ID：<span class="hl" data-tip="设备唯一编号，多台实训设备区分标识">PCT_100_28</span></p>
                 </div>
             </div>
         </section>
