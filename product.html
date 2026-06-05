@@ -1,191 +1,213 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>产品说明书|PCT100化工实训装置</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;scroll-behavior:smooth;}
-:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;--active:#00aa60;--bg:#0f1822;}
-.light{--bg:#f3f7f9;--dark:#fff;--card:#fff;--text:#222;}
-body{background:var(--bg);color:var(--text);display:flex;transition:0.4s;}
-.sidebar{width:260px;background:var(--dark);height:100vh;position:fixed;padding:35px 20px;}
-.sidebar h2{color:#58ffaa;font-size:21px;border-bottom:1px solid #2c3c4d;padding-bottom:14px;margin-bottom:30px;}
-.light .sidebar h2{color:#009955;}
-.sidebar ul{list-style:none;}
-.sidebar li{margin:10px 0;}
-.sidebar a{display:block;padding:11px 14px;border-radius:8px;color:#b9c8d8;text-decoration:none;transition:0.3s;}
-.light .sidebar a{color:#333;}
-.sidebar a:hover{background:#274b3c;color:#fff;}
-.sidebar a.active{background:var(--active);color:#fff;}
-.main-wrap{margin-left:260px;width:calc(100% - 260px);}
-.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;}
-.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
-.light .top-nav a{color:#333;}
-.top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
-#theme{margin-left:auto;background:#009955;border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;}
-.banner{background:linear-gradient(120deg,#153b30,#0c5942);padding:60px 40px;text-align:center;color:#fff;}
-.container{max-width:1200px;margin:0 auto;padding:50px 30px;}
-.content-box{background:var(--card);padding:34px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;box-shadow:0 2px 8px #00000012;}
-.content-box:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.25);}
-.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:var(--text);}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:30px;}
-table{width:100%;border-collapse:collapse;margin-top:16px;}
-th,td{border:1px solid #334558;padding:13px;color:#d1dde8;}
-.light th,.light td{color:#222;border:#ddd;}
-th{background:#1f3d32;color:#58ffaa;}
-.light th{background:#e6f9ef;color:#009955;}
-tr:hover{background:#253240;}
-.light tr:hover{background:#f0f9f5;}
-.hl{color:#58ffaa;font-weight:bold;position:relative;cursor:help;}
-.light .hl{color:#009955;}
-.hl:hover::after{content:attr(data-tip);position:absolute;left:0;top:120%;background:#111;color:#fff;padding:6px 10px;border-radius:5px;white-space:nowrap;z-index:99;}
-footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
-.light footer{color:#333;}
-#toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
-#timeBox{position:fixed;right:30px;bottom:90;color:var(--text);background:var(--card);padding:8px 12px;border-radius:8px;font-size:14px;box-shadow:0 2px 10px #0002;}
-.pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#222;padding:30px;border-radius:12px;z-index:9999;display:none;box-shadow:0 0 30px #0003;text-align:center;}
-.pop button{margin-top:15px;background:#009955;border:none;color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;}
-</style>
+    <meta charset="UTF-8">
+    <title>产品说明书</title>
+    <style>
+        /*====全局变量-换肤配置====*/
+        :root{
+            --bg:#ffffff;
+            --txt:#222222;
+            --cardbg:#f7f7f7;
+            --border:#ddd;
+            --btn:#2478ff;
+        }
+        [data-theme="dark"]{
+            --bg:#1a1a1a;
+            --txt:#eeeeee;
+            --cardbg:#2c2c2c;
+            --border:#444;
+            --btn:#398bff;
+        }
+        [data-theme="warm"]{
+            --bg:#fff9eb;
+            --txt:#5c3b20;
+            --cardbg:#fff2dd;
+            --border:#e6ccaa;
+            --btn:#e67722;
+        }
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            transition: background 0.3s,color 0.3s;
+        }
+        body{
+            background:var(--bg);
+            color:var(--txt);
+            padding:30px;
+            font-family:Microsoft Yahei;
+        }
+        .top-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:25px;
+            padding-bottom:15px;
+            border-bottom:1px solid var(--border);
+        }
+        .clock{
+            font-size:16px;
+            padding:6px 12px;
+            background:var(--cardbg);
+            border-radius:6px;
+        }
+        .skin-box button{
+            padding:5px 10px;
+            border:none;
+            border-radius:4px;
+            background:var(--btn);
+            color:#fff;
+            cursor:pointer;
+            margin:0 3px;
+        }
+        .content-box{
+            padding:25px;
+            background:var(--cardbg);
+            border-radius:10px;
+            border:1px solid var(--border);
+        }
+        h3{
+            margin-bottom:20px;
+        }
+        ul{
+            line-height:2.4;
+            padding-left:20px;
+        }
+        /*====拓展3：悬停高亮+悬浮提示卡片====*/
+        .hl{
+            color:#58ffaa;
+            font-weight:bold;
+            position:relative;
+            cursor:help;
+            display:inline-block;
+        }
+        .hl::after{
+            content:attr(data-tip);
+            position:absolute;
+            left:0;
+            top:135%;
+            background:#222;
+            color:#fff;
+            padding:7px 11px;
+            border-radius:6px;
+            font-size:13px;
+            max-width:350px;
+            white-space:normal;
+            z-index:9999;
+            display:none;
+        }
+        .hl:hover::after{
+            display:block;
+        }
+        /*弹窗样式*/
+        .pop-btn{
+            margin-top:20px;
+            padding:8px 16px;
+            background:var(--btn);
+            color:#fff;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+        }
+        .mask{
+            display:none;
+            position:fixed;
+            left:0;top:0;
+            width:100%;height:100%;
+            background:rgba(0,0,0,0.6);
+            z-index:999;
+        }
+        .pop-box{
+            width:420px;
+            padding:25px;
+            background:var(--bg);
+            border-radius:8px;
+            position:absolute;
+            left:50%;top:50%;
+            transform:translate(-50%,-50%);
+        }
+        .close{
+            position:absolute;
+            right:15px;top:12px;
+            cursor:pointer;
+            font-size:20px;
+        }
+    </style>
 </head>
 <body>
-<div class="pop" id="welcome">
-    <h3>欢迎查阅PCT100产品说明书V1.6</h3>
-    <p>设备ID：PCT_100_28</p>
-    <button onclick="document.getElementById('welcome').style.display='none'">开始浏览</button>
-</div>
-
-<div class="sidebar">
-    <h2>产品说明书目录</h2>
-    <ul>
-        <li><a href="#p1" class="active" data-target="p1">1.产品总览</a></li>
-        <li><a href="#p2" data-target="p2">2.硬件组成明细</a></li>
-        <li><a href="#p3" data-target="p3">3.整机功能介绍</a></li>
-        <li><a href="#p4" data-target="p4">4.整机技术参数</a></li>
-        <li><a href="#p5" data-target="p5">5.源码分层结构</a></li>
-        <li><a href="#p6" data-target="p6">6.上电使用步骤</a></li>
-        <li><a href="#p7" data-target="p7">7.日常保养规范</a></li>
-        <li><a href="#p8" data-target="p8">8.故障排查指南</a></li>
-    </ul>
-</div>
-
-<div class="main-wrap">
-    <div class="top-nav">
-        <a href="index.html">首页</a>
-        <a href="product.html">产品说明书</a>
-        <a href="tech.html">技术原理</a>
-        <a href="about.html">关于项目</a>
-        <button id="theme">切换浅色/深色</button>
-    </div>
-    <div class="banner">
-        <h1>PCT_100化工控制实训装置 · 产品说明书 V1.6</h1>
-    </div>
-    <div class="container">
-        <section id="p1" class="content-box">
-            <h2 class="title-h2">1.产品总览</h2>
-            <p>PCT_100是面向化工自动化、机电一体化专业的教学实训设备，完整模拟工业现场泵阀、开关量控制系统，依托Arduino主控实现本地手动+MQTT远程双模式控制，硬件精简可靠、软件模块化开发，满足课内实训、课程设计、技能考核全场景使用。</p>
-        </section>
-
-        <section id="p2" class="content-box">
-            <h2 class="title-h2">2.硬件组成明细</h2>
-            <div class="two-col">
-                <div>
-                    <h3 style="color:#58ffaa;margin-bottom:12px;">IO外设配置</h3>
-                    <ul style="padding-left:22px;line-height:2;">
-                        <li>LED状态指示灯：<span class="hl" data-tip>单片机数字输出引脚，控制指示灯</span>引脚6</li>
-                        <li>KEY1：<span class="hl" data-tip>系统启停输入引脚</span>引脚20</li>
-                        <li>KEY2：<span class="hl" data-tip>模式切换输入引脚</span>引脚21</li>
-                        <li>RELAY：<span class="hl" data-tip>继电器驱动输出引脚</span>引脚7</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 style="color:#58ffaa;margin-bottom:12px;">物联网通讯配置</h3>
-                    <p>MQTT服务器：<span class="hl" data-tip>公网云端MQTT服务地址</span>47.98.170.18:8081<br>设备ID：<span class="hl" data-tip>设备唯一编号，区分多台实训设备</span>PCT_100_28</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="p3" class="content-box">
-            <h2 class="title-h2">3.整机功能介绍</h2>
-            <ul style="padding-left:22px;line-height:2;">
-                <li>本地手动模式：无网络依靠按键完成设备启停、继电器通断控制</li>
-                <li>远程物联网模式：MQTT客户端远程下发指令控制输出，设备实时上报状态</li>
-                <li>状态可视化：LED跟随继电器、设备故障同步变化，直观反馈工况</li>
-            </ul>
-        </section>
-
-        <section id="p4" class="content-box">
-            <h2 class="title-h2">4.整机技术参数</h2>
-            <table>
-                <tr><th>项目</th><th>规格</th></tr>
-                <tr><td>固件版本</td><td>V1.6</td></tr>
-                <tr><td>工作电压</td><td>DC5V</td></tr>
-                <tr><td>输入IO</td><td>2路独立按键</td></tr>
-                <tr><td>输出IO</td><td>1路继电器+1路LED</td></tr>
-                <tr><td>通讯协议</td><td>WiFi+MQTT3.1.1</td></tr>
-            </table>
-        </section>
-
-        <section id="p5" class="content-box">
-            <h2 class="title-h2">5.源码分层结构</h2>
-            <ul style="padding-left:22px;line-height:2;">
-                <li>led.h / led.cpp：LED底层驱动</li>
-                <li>key.h / key.cpp：按键扫描消抖</li>
-                <li>relay.h / relay.cpp：继电器控制</li>
-                <li>exit.h / exit.cpp：系统复位</li>
-                <li>PCT_100.ino：主逻辑</li>
-            </ul>
-        </section>
-
-        <section id="p6" class="content-box">
-            <h2 class="title-h2">6.上电使用步骤</h2>
-            <ol style="padding-left:22px;line-height:2;">
-                <li>设备上电，LED闪烁代表自动连接WiFi</li>
-                <li>联网成功LED常亮，KEY1短按启用整机系统</li>
-                <li>KEY2短按在【本地/远程】模式切换</li>
-            </ol>
-        </section>
-
-        <section id="p7" class="content-box">
-            <h2 class="title-h2">7.日常保养规范</h2>
-            <p>避免潮湿、粉尘环境存放；每月检查接线端子紧固，禁止超额定电压供电，闲置存放于干燥避光环境。</p>
-        </section>
-
-        <section id="p8" class="content-box">
-            <h2 class="title-h2">8.故障排查指南</h2>
-            <div class="two-col">
-                <div>
-                    <p>✅ LED不亮：检查供电与引脚</p>
-                    <p>✅ 按键无反应：检查IO接线</p>
-                </div>
-                <div>
-                    <p>✅ MQTT连接失败：核对WiFi/服务器</p>
-                    <p>✅ 继电器不动作：检查负载接线</p>
-                </div>
-            </div>
-        </section>
+    <div class="top-bar">
+        <div class="clock" id="time">加载时间...</div>
+        <div class="skin-box">
+            <button onclick="setTheme('')">浅色</button>
+            <button onclick="setTheme('dark')">深色</button>
+            <button onclick="setTheme('warm')">暖黄</button>
+        </div>
     </div>
 
-    <button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
-    <div id="timeBox">页面已运行：<span id="sec">0</span> s</div>
-    <footer>©2026 PCT100化工实训装置 | 官方产品说明书</footer>
-</div>
+    <div class="content-box">
+        <h3>硬件引脚与MQTT参数说明书</h3>
+        <ul>
+            <li>LED状态指示灯：引脚6
+                <span class="hl" data-tip="单片机通用数字输出GPIO引脚，IO输出高电平点亮指示灯，低电平熄灭">引脚6</span>
+            </li>
+            <li>系统启停按键KEY1：引脚20
+                <span class="hl" data-tip="单片机输入引脚，下拉输入，按下拉低电平，触发设备启停逻辑">引脚20</span>
+            </li>
+            <li>继电器负载输出：D5
+                <span class="hl" data-tip="主控IO引脚，电平变化驱动三极管导通，控制继电器通断外接交流负载">D5</span>
+            </li>
+            <li>WiFi模块通信串口：RX/TX
+                <span class="hl" data-tip="UART串口收发引脚，主控与ESP8266/WiFi模组数据交互引脚">RX/TX</span>
+            </li>
+            <li>MQTT云端接入地址：
+                <span class="hl" data-tip="公共免费MQTT服务器地址，设备WiFi联网后自动连接，用于远程下发控制指令、上报设备在线状态">tcp://broker.emqx.io:1883</span>
+            </li>
+            <li>MQTT订阅主题：
+                <span class="hl" data-tip="设备接收云端指令专用主题，服务器往该主题发消息，硬件实时接收解析">dev/ctrl/esp32_01</span>
+            </li>
+            <li>MQTT上报主题：
+                <span class="hl" data-tip="设备定时上传状态、传感器数据到该主题，手机/网页订阅查看设备数据">dev/upload/esp32_01</span>
+            </li>
+        </ul>
+        <button class="pop-btn" id="openPop">打开产品提示弹窗</button>
+    </div>
 
-<script>
-window.onload=()=>document.getElementById("welcome").style.display="block";
-//换肤
-document.getElementById("theme").onclick=()=>document.body.classList.toggle("light");
-//计时
-let s=0;setInterval(()=>{s++;document.getElementById("sec").innerText=s},1000);
-//侧边栏滚动高亮
-const links=document.querySelectorAll(".sidebar a");
-const sections=document.querySelectorAll("section");
-window.onscroll=()=>{
-    let current="";
-    sections.forEach(sec=>{const top=sec.offsetTop;if(window.scrollY>=top-200)current=sec.id;});
-    links.forEach(link=>{link.classList.remove("active");if(link.getAttribute("data-target")===current)link.classList.add("active");});
-    document.getElementById("toTop").style.display=window.scrollY>300?"block":"none";
-};
-</script>
+    <!--弹窗容器-->
+    <div class="mask" id="mask">
+        <div class="pop-box">
+            <span class="close" id="closePop">×</span>
+            <h4>产品使用须知</h4>
+            <p>1.接线严格按照引脚说明书接线，防止电源反接烧坏主控；</p>
+            <p>2.MQTT地址可自行替换为私有部署服务器；</p>
+            <p>3.切换主题后页面样式全局同步生效。</p>
+        </div>
+    </div>
+
+    <script>
+        //1.换肤函数
+        function setTheme(theme){
+            document.documentElement.setAttribute('data-theme',theme);
+        }
+
+        //2.实时系统计时
+        function updateTime(){
+            let now=new Date();
+            let h=now.getHours().toString().padStart(2,'0');
+            let m=now.getMinutes().toString().padStart(2,'0');
+            let s=now.getSeconds().toString().padStart(2,'0');
+            document.getElementById('time').innerText=`当前时间：${h}:${m}:${s}`;
+        }
+        updateTime();
+        setInterval(updateTime,1000);
+
+        //3.弹窗控制
+        let mask=document.getElementById('mask');
+        document.getElementById('openPop').onclick=()=>mask.style.display='block';
+        document.getElementById('closePop').onclick=()=>mask.style.display='none';
+        mask.onclick=e=>{
+            if(e.target===mask) mask.style.display='none';
+        }
+    </script>
 </body>
 </html>
