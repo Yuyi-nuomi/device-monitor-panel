@@ -5,47 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>技术原理|PCT100化工实训装置</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;scroll-behavior:smooth;}
 :root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;}
 body{background:#0f1822;color:var(--text);}
 .top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;}
-.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;}
-.top-nav a:hover{background:var(--main);color:#fff;}
+.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
+.top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
 .container{max-width:1200px;margin:0 auto;padding:55px 30px;}
-.content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;}
+.content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;}
+.content-box:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.25);}
 .title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:#fff;}
 .img-box{width:100%;height:250px;border-radius:10px;margin:20px 0;object-fit:cover;}
 footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
+#toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
 </style>
 </head>
 <body>
+
 <div class="top-nav">
     <a href="index.html">首页</a>
     <a href="product.html">产品说明书</a>
     <a href="tech.html">技术原理</a>
     <a href="about.html">关于项目</a>
 </div>
+
 <div class="container">
     <h1 style="text-align:center;color:#58ffaa;margin-bottom:40px;font-size:32px;">PCT_100整机控制技术原理详解</h1>
-    <img class="img-box" src="images/flow.png" alt="控制流程图">
+    <img class="img-box" src="https://img0.baidu.com/it/u=3821513221,2133658251&fm=253&fmt=auto" alt="控制流程图">
 
     <div class="content-box">
         <h2 class="title-h2">一、整机闭环控制总体原理</h2>
-        <p>设备完全复刻工业PLC开关控制链路：<b>按键信号采集→主控逻辑运算→继电器输出+LED状态反馈</b>。本地输入来自物理按键，远程输入来自MQTT云端报文，两路输入共用同一套输出执行逻辑，实现双源控制单负载，贴合真实化工车间泵阀控制系统设计思路。主程序采用循环轮询机制，实时扫描按键电平与WiFi接收缓冲区，指令响应毫秒级。</p>
+        <p>设备完全复刻工业PLC开关控制链路：<b>按键信号采集→主控逻辑运算→继电器输出+LED状态反馈</b>。本地输入来自物理按键，远程输入来自MQTT云端报文，两路输入共用同一套输出执行逻辑，实现双源控制单负载，贴合真实化工车间泵阀控制系统设计思路。</p>
     </div>
     <div class="content-box">
         <h2 class="title-h2">二、按键硬件与软件采集原理</h2>
-        <p>硬件采用IO上拉输入电路，按键按下引脚电平由高变低；软件添加延时消抖算法，过滤机械按键抖动误触发。驱动分层封装按键扫描函数，上层业务无需关注底层电平细节，符合软件工程高内聚低耦合设计思想。KEY1负责系统使能标志位、KEY2负责模式切换标志位。</p>
+        <p>硬件采用IO上拉输入电路，按键按下引脚电平由高变低；软件添加延时消抖算法，过滤机械按键抖动误触发。驱动分层封装按键扫描函数，上层业务无需关注底层电平细节。</p>
     </div>
     <div class="content-box">
         <h2 class="title-h2">三、继电器与LED驱动原理</h2>
-        <p>主控IO电平驱动三极管导通/截止，控制继电器线圈供电，无源触点通断外接负载，模拟化工离心泵、电磁阀启停；LED与继电器状态绑定，闭合常亮、断开熄灭，故障状态高频闪烁，实现设备状态全可视化。</p>
+        <p>主控IO电平驱动三极管导通/截止，控制继电器线圈供电，无源触点通断外接负载，模拟化工离心泵、电磁阀启停；LED与继电器状态绑定，实现设备状态全可视化。</p>
     </div>
     <div class="content-box">
         <h2 class="title-h2">四、MQTT物联网通讯原理</h2>
-        <p>设备上电自动连接WiFi，TCP长连接接入公网MQTT Broker，订阅专属控制主题、发布设备状态主题。云端下发控制报文→设备解析指令→驱动外设；设备状态变动→主动上传数据包至服务器，采用发布订阅模型，是目前工业物联网主流低功耗通讯方案。</p>
+        <p>设备上电自动连接WiFi，TCP长连接接入公网MQTT Broker，订阅专属控制主题、发布设备状态主题，实现工业级低功耗双向通信。</p>
     </div>
 </div>
+
+<button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
 <footer>©2026 PCT100化工实训装置 | 技术原理文档</footer>
+
+<script>
+window.onscroll=()=>{document.getElementById("toTop").style.display=window.scrollY>300?"block":"none";}
+</script>
 </body>
 </html>

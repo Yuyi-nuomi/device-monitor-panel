@@ -5,32 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>关于项目|PCT100化工实训装置</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;scroll-behavior:smooth;}
 :root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;}
 body{background:#0f1822;color:var(--text);}
 .top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;}
-.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;}
-.top-nav a:hover{background:var(--main);color:#fff;}
+.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
+.top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
 .container{max-width:1200px;margin:0 auto;padding:55px 30px;}
-.content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;}
+.content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;}
+.content-box:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.25);}
 .title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:#fff;}
 .img-box{width:100%;height:250px;border-radius:10px;margin:20px 0;object-fit:cover;}
 footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
+#toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
 </style>
 </head>
 <body>
+
 <div class="top-nav">
     <a href="index.html">首页</a>
     <a href="product.html">产品说明书</a>
     <a href="tech.html">技术原理</a>
     <a href="about.html">关于项目</a>
 </div>
+
 <div class="container">
     <h1 style="text-align:center;color:#58ffaa;margin-bottom:40px;font-size:32px;">项目开发与应用介绍</h1>
-    <img class="img-box" src="images/device1.jpg" alt="实训设备实物">
+    <img class="img-box" src="https://img1.baidu.com/it/u=2911558869,3932711215&fm=253&fmt=auto" alt="实训设备实物">
     <div class="content-box">
         <h2 class="title-h2">一、项目开发背景</h2>
-        <p>传统高校化工自动化实训大型工业设备采购成本高、体积庞大无法搬进常规教室，本项目依托低成本Arduino硬件，自主开发微型化工过程控制实训台，百元成本复刻工业控制逻辑，填补小型课堂实训教具空缺，软硬件全自主开发。</p>
+        <p>传统高校化工自动化实训大型工业设备采购成本高、体积庞大无法搬进常规教室，本项目依托低成本Arduino硬件，自主开发微型化工过程控制实训台，百元成本复刻工业控制逻辑。</p>
     </div>
     <div class="content-box">
         <h2 class="title-h2">二、课程适用范围</h2>
@@ -43,13 +47,19 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
     </div>
     <div class="content-box">
         <h2 class="title-h2">三、项目开发分工</h2>
-        <p>项目分四大开发模块：硬件引脚规划与元器件选型、底层外设驱动编程、MQTT物联网对接、静态多页面产品官网开发。全部源码开源托管Github，网页依托Github Pages永久免费部署。</p>
+        <p>项目分四大开发模块：硬件引脚规划与元器件选型、底层外设驱动编程、MQTT物联网对接、静态多页面产品官网开发。全部源码开源托管Github。</p>
     </div>
     <div class="content-box">
         <h2 class="title-h2">四、开源版权说明</h2>
-        <p>本项目所有硬件源码、前端网页代码开源免费，仅限高校教学学习使用，禁止商用售卖。固件持续迭代优化，当前稳定版本V1.6，后续拓展PID液位闭环控制功能。</p>
+        <p>本项目所有硬件源码、前端网页代码开源免费，仅限高校教学学习使用，禁止商用售卖。固件持续迭代优化，当前稳定版本V1.6。</p>
     </div>
 </div>
+
+<button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
 <footer>©2026 PCT100化工实训装置 | 开源项目说明</footer>
+
+<script>
+window.onscroll=()=>{document.getElementById("toTop").style.display=window.scrollY>300?"block":"none";}
+</script>
 </body>
 </html>
