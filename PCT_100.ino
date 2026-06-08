@@ -10,7 +10,6 @@
 #include <EEPROM.h>
 #include <FastLED.h>
 
-// ====================== 【你原来的全部代码 100% 不动】 ======================
 // ========== WS2812配置 ==========
 #define WS2812_PIN 0
 #define LED_NUM 1
@@ -70,7 +69,7 @@ void clearSerialBuffer() {
 }
 
 // ========== RGB 函数 ==========
-void setRGB(uint8_t r, uint8_t b, uint8_t g) {
+void setRGB(uint8_t r, uint8_t g, uint8_t b) {
   rgbLed[0] = CRGB(r, g, b);
   FastLED.show();
 }
@@ -284,138 +283,6 @@ bool connectWiFi() {
   }
 }
 
-// ====================== 【你原来的按键 & 输出逻辑 100% 不动】 ======================
-void handle_key1();
-void handle_key2();
-void update_outputs();
-
-// ==================================================================================
-// ====================== 【只修复报错 + 固定8081端口】 =================
-// ==================================================================================
-#include <PubSubClient.h>
-#include <ArduinoJson.h>
-#include <Preferences.h>
-#include "secrets.h"  // 敏感信息放在这里
-
-WiFiClient espClient;
-PubSubClient mqttClient(espClient);
-Preferences prefs;
-
-// 从 secrets.h 读取配置
-String mqttServer = String(MQTT_SERVER);
-int mqttPort = MQTT_PORT;
-String mqttUser = String(MQTT_USER);
-String mqttPass = String(MQTT_PASS);
-String deviceId = String(DEVICE_ID);
-String pubTopic, subTopic;
-
-unsigned long lastMqttReconnect = 0;
-const unsigned long mqttReconnectDelay = 5000;
-unsigned long lastPublish = 0;
-const unsigned long publishInterval = 2000;
-
-// 【修复编译报错：声明函数】
-uint8_t relay_get_state();
-
-void loadMqttConfig() {
-  prefs.begin("mqtt", true);
-  mqttServer = prefs.getString("svr", mqttServer);
-  mqttPort   = prefs.getInt("port", mqttPort);
-  mqttUser   = prefs.getString("user", mqttUser);
-  mqttPass   = prefs.getString("pass", mqttPass);
-  deviceId   = prefs.getString("id", deviceId);
-  prefs.end();
-  pubTopic = "chemctrl/" + deviceId + "/status";
-  subTopic = "chemctrl/" + deviceId + "/command";
-}
-
-void saveMqttConfig() {
-  prefs.begin("mqtt", false);
-  prefs.putString("svr", mqttServer);
-  prefs.putInt("port", mqttPort);
-  prefs.putString("user", mqttUser);
-  prefs.putString("pass", mqttPass);
-  prefs.putString("id", deviceId);
-  prefs.end();
-}
-
-void parseSerialMqtt() {
-  if (!Serial.available()) return;
-  String line = Serial.readStringUntil('\n');
-  line.trim();
-  if (!line.startsWith("#")) return;
-
-  if (line.startsWith("#IP:"))   mqttServer = line.substring(4);
-  if (line.startsWith("#PORT:")) mqttPort = line.substring(6).toInt();
-  if (line.startsWith("#USER:")) mqttUser = line.substring(6);
-  if (line.startsWith("#PASS:")) mqttPass = line.substring(6);
-  if (line.startsWith("#ID:"))   deviceId = line.substring(4);
-
-  pubTopic = "chemctrl/" + deviceId + "/status";
-  subTopic = "chemctrl/" + deviceId + "/command";
-  saveMqttConfig();
-  if (mqttClient.connected()) mqttClient.disconnect();
-  mqttClient.setServer(mqttServer.c_str(), mqttPort);
-}
-
-void publishStatus() {
-  if (!mqttClient.connected() || !wifi_connected) return;
-  if (millis() - lastPublish < publishInterval) return;
-  lastPublish = millis();
-
-  StaticJsonDocument<192> doc;
-  doc["device"] = deviceId;
-  doc["enable"] = system_enabled;
-  doc["auto"] = auto_mode;
-  doc["temp"] = lastTempC;
-  doc["light"] = analogRead(LIGHT_PIN);
-  doc["led"] = led_state;
-  // 【修复：直接读取继电器状态】
-  doc["fan"] = digitalRead(12); // 改成你实际继电器引脚即可
-  doc["light_th"] = LIGHT_THRESHOLD_LUX;
-  doc["temp_th"] = TEMP_THRESHOLD_C;
-
-  char buf[200];
-  serializeJson(doc, buf);
-  mqttClient.publish(pubTopic.c_str(), buf);
-}
-
-void mqttCallback(char* topic, byte* payload, unsigned int len) {
-  payload[len] = 0;
-  StaticJsonDocument<192> doc;
-  DeserializationError err = deserializeJson(doc, payload);
-  if (err) return;
-
-  if (doc.containsKey("enable")) system_enabled = doc["enable"];
-  if (doc.containsKey("auto"))   auto_mode  = doc["auto"];
-  if (doc.containsKey("led"))    { led_state = doc["led"]; LED(led_state); }
-  if (doc.containsKey("fan"))    { relay_control(doc["fan"]); }
-}
-
-void mqttLoop() {
-  if (!wifi_connected) return;
-  if (mqttClient.connected()) {
-    mqttClient.loop();
-    publishStatus();
-    return;
-  }
-  if (millis() - lastMqttReconnect < mqttReconnectDelay) return;
-  lastMqttReconnect = millis();
-
-  String clientId = "ESP32_" + deviceId + "_" + String(random(1000));
-  mqttClient.connect(clientId.c_str(), mqttUser.c_str(), mqttPass.c_str());
-  mqttClient.subscribe(subTopic.c_str());
-
-  Serial.print("MQTT 尝试连接: ");
-  Serial.print(mqttServer);
-  Serial.print(":");
-  Serial.println(mqttPort);
-}
-
-// ==================================================================================
-// ====================== 【新增结束】 ======================
-// ==================================================================================
-
 void setup() {
   Serial.begin(115200);
   EEPROM.begin(EEPROM_SIZE);
@@ -439,11 +306,6 @@ void setup() {
 
   rgbBootBlink();
 
-  // === 加载MQTT配置 ===
-  loadMqttConfig();
-  mqttClient.setServer(mqttServer.c_str(), mqttPort);
-  mqttClient.setCallback(mqttCallback);
-
   if (loadWiFi()) {
     if (!connectWiFi()) {
       Serial.println("⚠️ 原有WiFi失效，进入配网");
@@ -460,16 +322,13 @@ void setup() {
 }
 
 void loop() {
-  parseSerialMqtt();
   handle_key1();
   handle_key2();
   update_outputs();
   checkWiFiStatus();
-  mqttLoop();
   delay(10);
 }
 
-// ====================== 【你原来的完整函数 100% 不动】 ======================
 void handle_key1() {
   uint8_t current = KEY1;
   static uint8_t last = 0;
@@ -494,7 +353,7 @@ void handle_key1() {
 void handle_key2() {
   static uint8_t last_key = 0;
   static unsigned long press_start = 0;
-  static bool longPressTriggered = false;
+  static bool longPressTriggered = false; // 防止重复触发
   uint8_t curr = KEY2;
 
   if (curr == 1 && last_key == 0) {
@@ -505,6 +364,7 @@ void handle_key2() {
   if (curr == 1) {
     unsigned long hold = millis() - press_start;
 
+    // 按住满2秒 → 立即切换模式，立即打印
     if (hold >= LONG_PRESS_THRESHOLD && !longPressTriggered && system_enabled) {
       longPressTriggered = true;
       auto_mode = !auto_mode;
@@ -512,11 +372,13 @@ void handle_key2() {
       Serial.flush();
     }
 
+    // 长按5秒清除WiFi
     if (hold >= RESET_WIFI_LONG_PRESS) {
       clearWiFi();
     }
   }
 
+  // 短按 → 手动模式切档位
   if (curr == 0 && last_key == 1) {
     unsigned long hold = millis() - press_start;
     if (hold < LONG_PRESS_THRESHOLD && system_enabled && !auto_mode) {
@@ -529,6 +391,7 @@ void handle_key2() {
 
   last_key = curr;
 }
+// ============================================================================
 
 void update_outputs() {
   if (system_enabled) {
@@ -560,7 +423,7 @@ void update_outputs() {
         u8g2.setCursor(0,58);
         if(wifi_connected){
           u8g2.print("WiFi:");u8g2.print(local_IP.toString());
-          u8g2.print("   ");
+          u8g2.print("   "); // 3个空格
           u8g2.setCursor(105,58);u8g2.print(rssiToPercent(WiFi.RSSI()));u8g2.print("%");
         }else{
           if(millis()-disconnectStartDisp < SHOW_FAIL_TIME){
@@ -608,10 +471,10 @@ void update_outputs() {
         u8g2.setCursor(0,46);
         char lampStr[5],fanStr[5];
         switch(function_mode){
-          case 0: strcpy(lampStr,"OFF");strcpy(fanStr,"OFF"); break;
-          case 1: strcpy(lampStr,"OFF");strcpy(fanStr,"ON");  break;
-          case 2: strcpy(lampStr,"ON"); strcpy(fanStr,"OFF"); break;
-          case 3: strcpy(lampStr,"ON"); strcpy(fanStr,"ON");  break;
+          case 0: strcpy(lampStr,"OFF");strcpy(fanStr,"OFF");break;
+          case 1: strcpy(lampStr,"OFF");strcpy(fanStr,"ON");break;
+          case 2: strcpy(lampStr,"ON");strcpy(fanStr,"OFF");break;
+          case 3: strcpy(lampStr,"ON");strcpy(fanStr,"ON");break;
         }
         u8g2.print("灯光:");u8g2.print(lampStr);
         u8g2.setCursor(62,46);
@@ -619,7 +482,7 @@ void update_outputs() {
         u8g2.setCursor(0,58);
         if (wifi_connected) {
           u8g2.print("WiFi:"); u8g2.print(local_IP.toString());
-          u8g2.print("   ");
+          u8g2.print("   "); // 3个空格
           u8g2.setCursor(105,58); u8g2.print(rssiToPercent(WiFi.RSSI())); u8g2.print("%");
         } else {
           if(millis()-disconnectStartDisp < SHOW_FAIL_TIME){
