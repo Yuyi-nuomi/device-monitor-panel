@@ -1,98 +1,116 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>关于项目 - PCT-100</title>
-    <style>
-        :root {
-            --bg: #1a1a1a;
-            --text: #e0e0e0;
-            --sidebar-bg: #252525;
-            --content-bg: #222;
-            --border: #333;
-            --accent: #66dd88;
-            --nav-bg: #0f3020;
-        }
-        .light-mode {
-            --bg: #ffffff;
-            --text: #121212;
-            --sidebar-bg: #f7f7f7;
-            --content-bg: #ffffff;
-            --border: #ddd;
-            --accent: #2980b9;
-            --nav-bg: #e8f5e9;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; transition: background-color 0.3s, color 0.3s; }
-        body { background-color: var(--bg); color: var(--text); display: flex; height: 100vh; }
-        /* 侧边目录 */
-        .sidebar { width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
-        .sidebar h2 { color: var(--accent); margin-bottom: 20px; font-size: 18px; }
-        .sidebar ul { list-style: none; }
-        .sidebar li { margin: 10px 0; }
-        .sidebar a { color: var(--text); text-decoration: none; display: block; padding: 8px 10px; border-radius: 4px; }
-        .sidebar a:hover, .sidebar a.active { background-color: var(--accent); color: #fff; }
-        /* 主内容区 */
-        .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        header { background-color: var(--nav-bg); padding: 20px; text-align: center; border-bottom: 1px solid var(--border); }
-        header h1 { color: #fff; font-size: 24px; }
-        nav { background-color: var(--sidebar-bg); padding: 10px; text-align: center; border-bottom: 1px solid var(--border); }
-        nav a { color: var(--text); text-decoration: none; margin: 0 15px; }
-        nav a:hover { color: var(--accent); }
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        h2 { color: var(--accent); margin: 30px 0 15px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
-        p { margin-bottom: 15px; line-height: 1.8; }
-        ul { margin-left: 20px; margin-bottom: 15px; line-height: 1.8; }
-        footer { background-color: var(--sidebar-bg); text-align: center; padding: 20px; color: #777; margin-top: auto; }
-        #themeToggle { position: fixed; top: 20px; right: 30px; padding: 8px 16px; background-color: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于项目 - PCT-100</title>
+<style>
+:root{
+  --bg:#1a1a1a; --text:#e0e0e0;
+  --sidebg:#252525; --mainbg:#222;
+  --border:#333; --accent:#66dd88;
+  --headerbg:#0f3020; --navbg:#222;
+}
+[data-theme="light"]{
+  --bg:#ffffff; --text:#121212;
+  --sidebg:#f7f7f7; --mainbg:#ffffff;
+  --border:#ddd; --accent:#2980b9;
+  --headerbg:#e8f5e9; --navbg:#f0f0f0;
+}
+*{margin:0;padding:0;box-sizing:border-box;transition:background-color .3s,color .3s;}
+body{background:var(--bg);color:var(--text);display:flex;height:100vh;}
+
+.sidebar{
+  width:260px;background:var(--sidebg);
+  border-right:1px solid var(--border);
+  padding:20px 0;overflow-y:auto;
+}
+.sidebar h2{
+  color:var(--accent);font-size:18px;
+  padding:0 20px 15px;border-bottom:1px solid var(--border);
+}
+.sidebar ul{list-style:none;}
+.sidebar li a{
+  display:block;padding:12px 20px;color:var(--text);
+  text-decoration:none;
+}
+.sidebar li a:hover,.sidebar li a.active{
+  background:var(--accent);color:#fff;
+}
+
+.main{flex:1;display:flex;flex-direction:column;overflow-y:auto;}
+header{background:var(--headerbg);padding:25px;text-align:center;border-bottom:1px solid var(--border);}
+header h1{color:#fff;font-size:24px;}
+nav{background:var(--navbg);padding:10px;text-align:center;border-bottom:1px solid var(--border);}
+nav a{color:var(--text);text-decoration:none;margin:0 12px;}
+nav a:hover{color:var(--accent);}
+.container{max-width:1200px;margin:30px auto;padding:0 30px;}
+h2{color:var(--accent);margin:30px 0 15px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+p{margin-bottom:15px;line-height:1.8;}
+ul{margin-left:20px;margin-bottom:15px;line-height:1.8;}
+footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin-top:auto;}
+
+#themeToggle{
+  position:fixed;top:20px;right:25px;
+  padding:8px 16px;background:var(--accent);color:#fff;
+  border:none;border-radius:4px;cursor:pointer;z-index:999;
+}
+</style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>📘 关于项目</h2>
-        <ul>
-            <li><a href="index.html">首页</a></li>
-            <li><a href="product.html">产品说明书</a></li>
-            <li><a href="tech.html">技术原理</a></li>
-            <li><a href="about.html" class="active">关于项目</a></li>
-        </ul>
-    </div>
-    <div class="main">
-        <header>
-            <h1>关于项目与团队 - PCT-100</h1>
-        </header>
-        <nav>
-            <a href="index.html">首页</a>
-            <a href="product.html">产品说明书</a>
-            <a href="tech.html">技术原理</a>
-            <a href="about.html">关于项目</a>
-        </nav>
-        <div class="container">
-            <h2>一、项目背景</h2>
-            <p>化工自动化与物联网技术发展迅速，高校教学亟需低成本、高集成、易上手的实训平台。PCT-100 旨在填补教学设备缺口，覆盖嵌入式、传感器、自动控制、物联网通信等核心知识点，满足课程设计、实训教学与竞赛需求。</p>
 
-            <h2>二、项目目标</h2>
-            <ul>
-                <li>低成本：采用通用元器件，降低采购与维护成本</li>
-                <li>全功能：集采集、控制、显示、通信、指示于一体</li>
-                <li>易扩展：预留接口，支持二次开发与功能扩展</li>
-                <li>教学友好：配套完整文档、代码注释、实训案例</li>
-            </ul>
+<div class="sidebar">
+  <h2>📘 关于项目</h2>
+  <ul>
+    <li><a href="index.html">首页</a></li>
+    <li><a href="product.html">产品说明书</a></li>
+    <li><a href="tech.html">技术原理</a></li>
+    <li><a href="about.html" class="active">关于项目</a></li>
+  </ul>
+</div>
 
-            <h2>三、适用场景</h2>
-            <p>高校自动化、电气工程、物联网、嵌入式等专业课程实训；课程设计、毕业设计、学科竞赛；企业岗前技能培训。</p>
+<div class="main">
+  <header>
+    <h1>关于项目与团队 - PCT-100</h1>
+  </header>
+  <nav>
+    <a href="index.html">首页</a>
+    <a href="product.html">产品说明书</a>
+    <a href="tech.html">技术原理</a>
+    <a href="about.html">关于项目</a>
+  </nav>
+  <div class="container">
+    <h2>一、项目背景</h2>
+    <p>化工自动化与物联网技术发展迅速，高校教学亟需低成本、高集成、易上手的实训平台。PCT-100 旨在填补教学设备缺口，覆盖嵌入式、传感器、自动控制、物联网通信等核心知识点，满足课程设计、实训教学与竞赛需求。</p>
+    <p>当前市场上工业级实训设备价格高昂、体积庞大、操作复杂，不适合日常教学；而简易开发板功能单一、缺乏工业场景模拟，难以满足自动化专业教学要求。PCT-100 兼顾低成本与专业性，适配高校教学实际。</p>
 
-            <h2>四、团队与致谢</h2>
-            <p>本项目由河北地质大学信息工程学院学生团队独立设计、开发与测试。感谢指导教师在方案设计、硬件选型、软件开发过程中的悉心指导与支持。</p>
+    <h2>二、项目目标</h2>
+    <ul>
+      <li>低成本：采用通用元器件，降低采购与维护成本，适合批量教学</li>
+      <li>全功能：集采集、控制、显示、通信、指示于一体，覆盖核心技术点</li>
+      <li>易扩展：预留接口，支持二次开发与功能扩展，适配不同教学需求</li>
+      <li>教学友好：配套完整文档、代码注释、实训案例，降低学习门槛</li>
+      <li>稳定可靠：工业级设计理念，经过严格测试，保证长时间稳定运行</li>
+    </ul>
 
-            <h2>五、开源与版权</h2>
-            <p>本项目硬件设计与软件代码仅供教学学习使用，未经授权不得用于商业用途。欢迎学习交流与二次开发，引用请注明来源。</p>
-        </div>
-        <footer>
-            <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
-        </footer>
-    </div>
-    <button id="themeToggle">切换浅色模式</button>
-    <script src="theme.js"></script>
+    <h2>三、适用场景</h2>
+    <p>高校自动化、电气工程、物联网、嵌入式等专业课程实训；课程设计、毕业设计、学科竞赛；企业岗前技能培训、技术交流与演示。</p>
+    <p>可支撑《传感器原理》《自动控制原理》《物联网技术》《嵌入式系统》等多门课程的实验教学，帮助学生从理论到实践，提升工程实践能力。</p>
+
+    <h2>四、团队与致谢</h2>
+    <p>本项目由河北地质大学信息工程学院学生团队独立设计、开发与测试。团队成员涵盖自动化、物联网、嵌入式等专业方向，分工明确、协作高效。</p>
+    <p>感谢指导教师在方案设计、硬件选型、软件开发、文档编写过程中的悉心指导与支持；感谢学校提供的实验环境与资源支持；感谢所有参与测试与反馈的师生。</p>
+
+    <h2>五、开源与版权</h2>
+    <p>本项目硬件设计与软件代码仅供教学学习使用，未经授权不得用于商业用途。欢迎学习交流与二次开发，引用请注明来源。</p>
+    <p>项目持续更新优化，后续将增加更多功能模块与实训案例，欢迎关注与支持。</p>
+  </div>
+  <footer>
+    <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
+  </footer>
+</div>
+
+<button id="themeToggle">切换浅色模式</button>
+<script src="theme.js"></script>
 </body>
 </html>
