@@ -2,7 +2,7 @@
 #define __VERSION_H
 
 
-#define VERSION    "V2.7"
+#define VERSION    "V2.8"
 
 #define DEVICE_ID "PCT_100_028"  // 设备ID
 

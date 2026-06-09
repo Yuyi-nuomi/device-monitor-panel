@@ -98,7 +98,7 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
         <li><strong>状态指示线程：</strong>RGB 彩灯状态机，实时反映设备运行状态</li>
         <li><strong>主线程：</strong>按键处理、传感器采集、控制逻辑、OLED 显示</li>
       </ul>
-      <p>核心变量通过 `portENTER_CRITICAL` 互斥锁保护，避免多线程数据竞争，保证系统稳定性。</p>
+      <p>核心变量通过 <code>portENTER_CRITICAL</code> 互斥锁保护，避免多线程数据竞争，保证系统稳定性。</p>
     </div>
 
     <div class="section" id="hardware">
@@ -109,7 +109,7 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
         <li><strong>DS18B20 温度传感器：</strong>引脚 10，单总线通信，OneWire 库驱动</li>
         <li><strong>光敏电阻：</strong>引脚 1，ADC 采集，分压电路实现光照检测</li>
         <li><strong>OLED 显示屏：</strong>I2C 总线，SDA=4，SCL=5，U8g2 库驱动 128×64 显示</li>
-        <li><strong>继电器与按键：</strong>在 `exit.h`、`key.h` 中定义，控制风扇、LED 灯与系统启停</li>
+        <li><strong>继电器与按键：</strong>在 <code>exit.h</code>、<code>key.h</code> 中定义，控制风扇、LED 灯与系统启停</li>
       </ul>
     </div>
 
@@ -117,24 +117,26 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
       <h2>三、FreeRTOS 双线程核心</h2>
       <p>系统创建两个独立线程，和主线程并行运行：</p>
       <ul>
-        <li><strong>WiFi-MQTT 线程（`wifiMqttTask`）：</strong>高优先级，负责 WiFi 连接管理、MQTT 重连、数据发布与指令接收，保证通信实时性</li>
-        <li><strong>RGB 彩灯线程（`rgbLedTask`）：</strong>中等优先级，独立运行状态机，不阻塞主线程的传感器与控制逻辑</li>
+        <li><strong>WiFi-MQTT 线程（<code>wifiMqttTask</code>）：</strong>负责 WiFi 连接管理、MQTT 重连、数据发布与指令接收，保障通信实时性</li>
+        <li><strong>RGB 彩灯线程（<code>rgbLedTask</code>）：</strong>独立运行状态机，纯状态指示，不阻塞采集、控制等核心逻辑</li>
       </ul>
       <p>线程间通过全局变量与互斥锁通信，避免数据竞争，实现功能解耦。</p>
     </div>
 
+    <!-- ========== 已修正：RGB彩灯模块 ========== -->
     <div class="section" id="rgb">
       <h2>四、RGB 彩灯状态机实现</h2>
-      <p>`rgbLedTask` 线程中实现了 6 种状态的彩灯控制，和设备状态一一对应：</p>
+      <p>彩灯逻辑运行在独立线程中，优先读取风扇、补光灯、传感器、网络状态，自动匹配对应灯效，共划分6种工作模式，同时支持色彩渐变动画函数 <code>rgbGradualStart</code> 实现平滑过渡。</p>
+      <p>状态判定优先级：网络异常 > 传感器报警 > 负载运行 > 正常待机，系统关闭时彩灯全灭。各模式对应规则如下：</p>
       <ul>
-        <li>模式1：红灯+绿灯+蓝灯交替闪烁（报警+风扇+灯光开启）</li>
-        <li>模式2：红/绿/蓝三色交替闪烁（温度报警+光照报警+正常）</li>
-        <li>模式3：红→绿→蓝渐变切换（温度/光照正常，风扇运行）</li>
-        <li>模式4：彩虹渐变循环（MQTT 离线）</li>
-        <li>模式5：红/绿快速交替（WiFi 未连接）</li>
-        <li>模式6：绿/蓝/青渐变循环（正常运行状态）</li>
+        <li><strong>模式1</strong>：补光灯、风扇同时开启 → 红/绿/蓝三色交替快闪</li>
+        <li><strong>模式2</strong>：补光灯开启、风扇关闭、光照低于阈值（光照报警）→ 红/绿/蓝三色循环闪烁</li>
+        <li><strong>模式3</strong>：补光灯关闭、风扇开启 → 红→绿→蓝顺序渐变切换</li>
+        <li><strong>模式4</strong>：MQTT 连接断开（mqtt_ok=false）→ 三色连续渐变流水灯</li>
+        <li><strong>模式5</strong>：WiFi 未连接（wifi_connected=false）→ 红、绿两色快速交替闪烁</li>
+        <li><strong>模式6</strong>：设备全部正常运行、无异常、负载按需启停 → 绿、蓝、青多色循环渐变</li>
       </ul>
-      <p>代码中实现了渐变效果函数 `rgbGradualStart`，支持平滑过渡，避免灯效突变。</p>
+      <p>代码通过 <code>rgb_step</code> 分步控制灯效时序，搭配毫秒级计时器精准控制闪烁/切换间隔，动画效果稳定不卡顿。</p>
     </div>
 
     <div class="section" id="wifi">
@@ -142,33 +144,32 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
       <p>WiFi 管理模块包含三大功能：</p>
       <ul>
         <li><strong>WiFi 信息持久化：</strong>使用 EEPROM 保存 WiFi SSID 和密码，上电自动读取</li>
-        <li><strong>自动重连机制：</strong>掉线后每 3 秒尝试重连一次，`wifiReconnectTimer` 控制重试间隔</li>
+        <li><strong>自动重连机制：</strong>掉线后每 3 秒尝试重连一次，<code>wifiReconnectTimer</code> 控制重试间隔</li>
         <li><strong>配网模式：</strong>长按按键进入配网，串口输入 WiFi 信息，支持扫描附近 WiFi 列表</li>
       </ul>
-      <p>连接状态通过 `wifi_connected` 变量标记，供其他模块使用。</p>
+      <p>连接状态通过 <code>wifi_connected</code> 变量标记，供其他模块使用。</p>
     </div>
 
     <div class="section" id="mqtt">
       <h2>六、MQTT 通信与指令处理</h2>
       <p>MQTT 模块实现了完整的发布/订阅功能：</p>
       <ul>
-        <li><strong>主题定义：</strong>上行主题 `chemctrl/设备ID/status`，下行主题 `chemctrl/设备ID/command`</li>
+        <li><strong>主题定义：</strong>上行主题 <code>chemctrl/设备ID/status</code>，下行主题 <code>chemctrl/设备ID/command</code></li>
         <li><strong>数据发布：</strong>定时上传温度、光照、模式、设备状态，JSON 格式封装</li>
-        <li><strong>指令处理：</strong>支持 `get_status`、`set_relay`、`set_mode`、`set_threshold` 四类指令</li>
+        <li><strong>指令处理：</strong>支持 <code>get_status</code>、<code>set_relay</code>、<code>set_mode</code>、<code>set_threshold</code> 四类指令</li>
         <li><strong>配置管理：</strong>使用 Preferences 保存 MQTT 服务器地址、端口、用户名、密码</li>
       </ul>
-      <p>回调函数 `mqttCallback` 负责解析指令并执行对应操作，支持远程控制与参数修改。</p>
+      <p>回调函数 <code>mqttCallback</code> 负责解析指令并执行对应操作，支持远程控制与参数修改。</p>
     </div>
 
     <div class="section" id="key">
       <h2>七、按键逻辑与模式切换</h2>
-      <p>三个按键分别实现不同功能，支持短按、长按、长按重置：</p>
+      <p>两个按键分别实现不同功能，支持短按、长按区分逻辑，内置按键防抖：</p>
       <ul>
-        <li><strong>K1：系统启停</strong>：短按切换系统开启/关闭，控制所有外设电源</li>
-        <li><strong>K2：模式切换</strong>：短按切换自动/手动模式，长按（2秒）切换模式，长按（5秒）重置 WiFi</li>
-        <li><strong>K3：档位调节</strong>：手动模式下短按切换风扇/LED 档位，共 4 种状态</li>
+        <li><strong>K1：系统启停</strong>：短按切换系统开启/关闭，控制所有外设电源与状态机</li>
+        <li><strong>K2：功能按键</strong>：短按（手动模式下）切换负载档位；长按2秒切换自动/手动模式；长按5秒清除WiFi配置并重启设备</li>
       </ul>
-      <p>按键处理加入防抖延时，避免误触发，逻辑封装在 `handle_key1`、`handle_key2` 函数中。</p>
+      <p>按键状态实时轮询，触发动作后同步置位 <code>needPublish</code>，主动上报状态至MQTT服务器。</p>
     </div>
 
     <div class="section" id="sensor">
@@ -176,9 +177,9 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
       <p>传感器模块实现了温度和光照的采集、滤波与控制逻辑：</p>
       <ul>
         <li><strong>温度采集：</strong>DS18B20 单总线读取，分辨率 0.0625℃，每秒刷新一次</li>
-        <li><strong>光照采集：</strong>光敏电阻 ADC 采集，滑动平均滤波（窗口大小 5），抑制干扰</li>
-        <li><strong>阈值控制：</strong>温度/光照阈值支持本地按键和远程 MQTT 修改，断电保存</li>
-        <li><strong>滞回控制：</strong>光照控制加入 60 个单位的滞回值，避免频繁开关 LED</li>
+        <li><strong>光照采集：</strong>光敏电阻 ADC 采集，5点滑动平均滤波，抑制数值波动干扰</li>
+        <li><strong>阈值控制：</strong>温度/光照阈值支持本地逻辑与远程 MQTT 修改，断电保存</li>
+        <li><strong>滞回控制：</strong>光照控制加入60单位滞回区间，防止光照临界值时LED频繁通断</li>
       </ul>
       <p>采集数据通过互斥锁保护，供多线程读取，保证数据一致性。</p>
     </div>
@@ -193,7 +194,7 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
         <li>WiFi 连接状态、IP 地址、信号强度百分比</li>
         <li>重连状态提示（5秒内显示“重连中”，超时显示“重连失败”）</li>
       </ul>
-      <p>使用 U8g2 库驱动，支持中文显示，字体为 `u8g2_font_wqy12_t_gb2312`。</p>
+      <p>使用 U8g2 库驱动，支持中文显示，字体为 <code>u8g2_font_wqy12_t_gb2312</code>。</p>
     </div>
 
     <div class="section" id="eeprom">
