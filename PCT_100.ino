@@ -9,6 +9,10 @@
 #include <WiFi.h>
 #include <EEPROM.h>
 #include <FastLED.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+#include <Preferences.h>
+#include "secrets.h"
 
 // ========== WS2812配置 ==========
 #define WS2812_PIN 0
@@ -82,6 +86,173 @@ void rgbBootBlink() {
   }
   setRGB(0, 0, 0);
 }
+
+// ====================== [MQTT] =====================
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
+Preferences prefs;
+
+#define MQTT_MODE_EXTERNAL 0
+#define MQTT_MODE_INTERNAL 1
+
+String mqttServer = String(MQTT_SERVER);
+int mqttPort = MQTT_PORT;
+String mqttUser = String(MQTT_USER);
+String mqttPass = String(MQTT_PASS);
+String deviceId = String(DEVICE_ID);
+int mqttMode = MQTT_MODE_EXTERNAL;
+String pubTopic, subTopic;
+
+unsigned long lastMqttReconnect = 0;
+const unsigned long mqttReconnectDelay = 5000;
+unsigned long lastPublish = 0;
+const unsigned long publishInterval = 2000;
+
+void loadMqttConfig() {
+  prefs.begin("mqtt", true);
+  mqttServer = prefs.getString("ip", mqttServer);
+  mqttPort   = prefs.getInt("port", mqttPort);
+  mqttUser   = prefs.getString("user", mqttUser);
+  mqttPass   = prefs.getString("pass", mqttPass);
+  deviceId   = prefs.getString("id", deviceId);
+  mqttMode   = prefs.getInt("mode", mqttMode);
+  prefs.end();
+  pubTopic = "chemctrl/" + deviceId + "/status";
+  subTopic = "chemctrl/" + deviceId + "/command";
+}
+
+void saveMqttConfig() {
+  prefs.begin("mqtt", false);
+  prefs.putString("ip", mqttServer);
+  prefs.putInt("port", mqttPort);
+  prefs.putString("user", mqttUser);
+  prefs.putString("pass", mqttPass);
+  prefs.putString("id", deviceId);
+  prefs.putInt("mode", mqttMode);
+  prefs.end();
+}
+
+void parseSerialMqtt() {
+  if (!Serial.available()) return;
+  String line = Serial.readStringUntil('\n');
+  line.trim();
+  if (!line.startsWith("#")) return;
+  bool configChanged = false;
+  if (line.startsWith("#IP:"))   { mqttServer = line.substring(4); configChanged = true; }
+  if (line.startsWith("#PORT:")) { mqttPort = line.substring(6).toInt(); configChanged = true; }
+  if (line.startsWith("#USER:")) { mqttUser = line.substring(6); configChanged = true; }
+  if (line.startsWith("#PASS:")) { mqttPass = line.substring(6); configChanged = true; }
+  if (line.startsWith("#ID:"))   { deviceId = line.substring(4); configChanged = true; }
+  if (line.startsWith("#MODE:INTERNAL")) { mqttMode=MQTT_MODE_INTERNAL; mqttPort=1883; configChanged=true; Serial.println("-> 内网模式(1883)"); }
+  if (line.startsWith("#MODE:EXTERNAL")) { mqttMode=MQTT_MODE_EXTERNAL; mqttPort=8081; configChanged=true; Serial.println("-> 外网模式(8081)"); }
+  if (line.startsWith("#HELP")) {
+    Serial.println();    Serial.println("===== MQTT Commands =====");
+    Serial.println("#IP:<addr>  #PORT:<port>  #USER:<user>  #PASS:<pass>  #ID:<id>");
+    Serial.println("#MODE:INTERNAL | #MODE:EXTERNAL | #STATUS | #HELP");
+    return;
+  }
+  if (line.startsWith("#STATUS")) {
+    Serial.println();    Serial.println("===== MQTT Status =====");
+    Serial.print("Server: "); Serial.println(mqttServer);
+    Serial.print("Port: "); Serial.println(mqttPort);
+    Serial.print("User: "); Serial.println(mqttUser);
+    Serial.print("Device: "); Serial.println(deviceId);
+    Serial.print("Mode: "); Serial.println(mqttMode==MQTT_MODE_INTERNAL?"Internal":"External");
+    Serial.print("WiFi: "); Serial.println(WiFi.status()==WL_CONNECTED?"Connected":"Disconnected");
+    Serial.print("MQTT: "); Serial.println(mqttClient.connected()?"Connected":"Disconnected");
+    return;
+  }
+  if (!configChanged) return;
+  pubTopic = "chemctrl/" + deviceId + "/status";
+  subTopic = "chemctrl/" + deviceId + "/command";
+  saveMqttConfig();
+  mqttClient.setServer(mqttServer.c_str(), mqttPort);
+  if (mqttClient.connected()) mqttClient.disconnect();
+  lastMqttReconnect = 0;
+  Serial.println("+ MQTT config saved, reconnecting...");
+}
+
+void publishStatus() {
+  if (!mqttClient.connected() || WiFi.status() != WL_CONNECTED) return;
+  if (millis() - lastPublish < publishInterval) return;
+  lastPublish = millis();
+  StaticJsonDocument<256> doc;
+  doc["temperature"] = (int)(lastTempC * 10) / 10.0;
+  doc["light"] = analogRead(LIGHT_PIN);
+  doc["mode"] = auto_mode ? "auto" : "manual";
+  doc["key1_lock"] = system_enabled ? true : false;
+  uint8_t light_state = (function_mode == 2 || function_mode == 3) ? 1 : 0;
+  uint8_t fan_state   = (function_mode == 1 || function_mode == 3) ? 1 : 0;
+  doc["relay3"] = light_state ? true : false;  // light
+  doc["relay4"] = fan_state ? true : false;     // fan
+  doc["temp_threshold"] = (float)TEMP_THRESHOLD_C;
+  doc["light_threshold"] = LIGHT_THRESHOLD_LUX;
+  char buf[256];
+  serializeJson(doc, buf);
+  mqttClient.publish(pubTopic.c_str(), buf);
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int len) {
+  StaticJsonDocument<256> doc;
+  if (deserializeJson(doc, payload, len)) return;
+  String debug_msg; serializeJson(doc, debug_msg);
+  Serial.println("\n[MQTT cmd] " + debug_msg);
+  const char* cmd = doc["cmd"];
+  if (strcmp(cmd, "get_status") == 0) {
+    publishStatus();
+  } else if (strcmp(cmd, "set_relay") == 0) {
+    if (!system_enabled || auto_mode) return;
+    int relay = doc["relay"]; bool val = doc["value"];
+    if (relay == 3) {  // light
+      if (val) function_mode |= 0x02; else function_mode &= ~0x02;
+    } else if (relay == 4) {  // fan
+      if (val) function_mode |= 0x01; else function_mode &= ~0x01;
+    }
+    publishStatus();
+  } else if (strcmp(cmd, "set_mode") == 0) {
+    if (!system_enabled) return;
+    const char* mode = doc["mode"];
+    if (strcmp(mode, "auto") == 0) auto_mode = true;
+    else if (strcmp(mode, "manual") == 0) auto_mode = false;
+    publishStatus();
+  } else if (strcmp(cmd, "set_threshold") == 0) {
+    if (doc.containsKey("temp")) ;  // would set runtime threshold
+    if (doc.containsKey("light")) ; // would set runtime threshold
+    publishStatus();
+  }
+}
+
+void mqttLoop() {
+  if (WiFi.status() != WL_CONNECTED) return;
+  if (mqttClient.connected()) {
+    mqttClient.loop();
+    publishStatus();
+    static unsigned long lastMqttLog = 0;
+    if (millis() - lastMqttLog >= 30000) { lastMqttLog = millis(); Serial.print("[MQTT] connected to "); Serial.print(mqttServer); Serial.print(":"); Serial.println(mqttPort); Serial.flush(); }
+    return;
+  }
+  if (millis() - lastMqttReconnect < mqttReconnectDelay) return;
+  lastMqttReconnect = millis();
+  Serial.print("[MQTT] Connecting to "); Serial.print(mqttServer); Serial.print(":"); Serial.println(mqttPort);
+  Serial.flush();
+  String clientId = "ESP32_" + deviceId + "_" + String(random(0xffff), HEX);
+  if (mqttClient.connect(clientId.c_str(), mqttUser.c_str(), mqttPass.c_str())) {
+    mqttClient.subscribe(subTopic.c_str());
+    publishStatus();
+    Serial.println("[MQTT] Connected! Device: " + deviceId);
+    Serial.flush();
+  } else {
+    int st = mqttClient.state();
+    Serial.print("- MQTT failed: "); Serial.print(st);
+    if (st == -2) Serial.println(" (server not responding)");
+    else if (st == -4) Serial.println(" (timeout)");
+    else if (st >= 1 && st <= 5) Serial.println(" (auth/protocol)");
+    else Serial.println("");
+    Serial.flush();
+  }
+}
+
+// ====================== [MQTT End] ===================
 
 // WiFi 实时状态检测+分级RGB【绿/蓝/黄/红】+自动重连
 void checkWiFiStatus() {
@@ -306,6 +477,12 @@ void setup() {
 
   rgbBootBlink();
 
+  // === MQTT init ===
+  loadMqttConfig();
+  mqttClient.setServer(mqttServer.c_str(), mqttPort);
+  mqttClient.setCallback(mqttCallback);
+  mqttClient.setKeepAlive(15);
+
   if (loadWiFi()) {
     if (!connectWiFi()) {
       Serial.println("⚠️ 原有WiFi失效，进入配网");
@@ -326,6 +503,8 @@ void loop() {
   handle_key2();
   update_outputs();
   checkWiFiStatus();
+  parseSerialMqtt();
+  mqttLoop();
   delay(10);
 }
 
