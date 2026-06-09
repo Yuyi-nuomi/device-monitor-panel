@@ -18,27 +18,8 @@
   --headerbg:#e8f5e9; --navbg:#f0f0f0;
 }
 *{margin:0;padding:0;box-sizing:border-box;transition:background-color .3s,color .3s;}
-body{background:var(--bg);color:var(--text);display:flex;height:100vh;}
+body{background:var(--bg);color:var(--text);}
 
-.sidebar{
-  width:260px;background:var(--sidebg);
-  border-right:1px solid var(--border);
-  padding:20px 0;overflow-y:auto;
-}
-.sidebar h2{
-  color:var(--accent);font-size:18px;
-  padding:0 20px 15px;border-bottom:1px solid var(--border);
-}
-.sidebar ul{list-style:none;}
-.sidebar li a{
-  display:block;padding:12px 20px;color:var(--text);
-  text-decoration:none;
-}
-.sidebar li a:hover,.sidebar li a.active{
-  background:var(--accent);color:#fff;
-}
-
-.main{flex:1;display:flex;flex-direction:column;overflow-y:auto;}
 header{background:var(--headerbg);padding:25px;text-align:center;border-bottom:1px solid var(--border);}
 header h1{color:#fff;font-size:24px;}
 nav{background:var(--navbg);padding:10px;text-align:center;border-bottom:1px solid var(--border);}
@@ -48,7 +29,7 @@ nav a:hover{color:var(--accent);}
 h2{color:var(--accent);margin:30px 0 15px;padding-bottom:5px;border-bottom:1px solid var(--border);}
 p{margin-bottom:15px;line-height:1.8;}
 ul{margin-left:20px;margin-bottom:15px;line-height:1.8;}
-footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin-top:auto;}
+footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin-top:40px;}
 
 #themeToggle{
   position:fixed;top:20px;right:25px;
@@ -58,18 +39,6 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
 </style>
 </head>
 <body>
-
-<div class="sidebar">
-  <h2>📘 关于项目</h2>
-  <ul>
-    <li><a href="index.html">首页</a></li>
-    <li><a href="product.html">产品说明书</a></li>
-    <li><a href="tech.html">技术原理</a></li>
-    <li><a href="about.html" class="active">关于项目</a></li>
-  </ul>
-</div>
-
-<div class="main">
   <header>
     <h1>关于项目与团队 - PCT-100</h1>
   </header>
@@ -108,7 +77,6 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
   <footer>
     <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
   </footer>
-</div>
 
 <button id="themeToggle">切换浅色模式</button>
 <script src="theme.js"></script>
