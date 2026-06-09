@@ -1,4 +1,4 @@
-#include "exit.h"
+﻿#include "exit.h"
 #include "key.h"
 #include "led.h"
 #include "relay.h"
@@ -32,10 +32,13 @@ U8G2_SH1106_128X64_VCOMH0_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 #define RESET_WIFI_LONG_PRESS 5000
 
 #define LIGHT_PIN 1
-#define LIGHT_THRESHOLD_LUX 300
 #define LIGHT_HYSTERESIS 60
 #define LIGHT_FILTER_SIZE 5
-#define TEMP_THRESHOLD_C 30
+
+// ====================== 【修复点1】阈值改为全局变量 ======================
+int LIGHT_THRESHOLD_LUX = 300;
+float TEMP_THRESHOLD_C = 30.0;
+// ======================================================================
 
 uint8_t auto_mode = 1;
 float lastTempC = 0;
@@ -52,9 +55,9 @@ String targetPWD = "";
 
 //WiFi重连参数
 unsigned long wifiReconnectTimer = 0;
-const unsigned long RECONNECT_INTERVAL = 3000;    //3秒重试
-const unsigned long SHOW_FAIL_TIME = 5000;       //5秒后显示失败
-unsigned long disconnectStartDisp = 0;    //全局掉线计时
+const unsigned long RECONNECT_INTERVAL = 3000;
+const unsigned long SHOW_FAIL_TIME = 5000;
+unsigned long disconnectStartDisp = 0;
 
 #define EEPROM_SIZE 512
 #define EEPROM_FLAG_ADDR 0
@@ -116,6 +119,11 @@ void loadMqttConfig() {
   mqttPass   = prefs.getString("pass", mqttPass);
   deviceId   = prefs.getString("id", deviceId);
   mqttMode   = prefs.getInt("mode", mqttMode);
+
+  // 加载阈值
+  TEMP_THRESHOLD_C = prefs.getFloat("temp_th", 30.0);
+  LIGHT_THRESHOLD_LUX = prefs.getInt("light_th", 300);
+
   prefs.end();
   pubTopic = "chemctrl/" + deviceId + "/status";
   subTopic = "chemctrl/" + deviceId + "/command";
@@ -129,6 +137,11 @@ void saveMqttConfig() {
   prefs.putString("pass", mqttPass);
   prefs.putString("id", deviceId);
   prefs.putInt("mode", mqttMode);
+
+  // 保存阈值
+  prefs.putFloat("temp_th", TEMP_THRESHOLD_C);
+  prefs.putInt("light_th", LIGHT_THRESHOLD_LUX);
+
   prefs.end();
 }
 
@@ -183,44 +196,64 @@ void publishStatus() {
   doc["key1_lock"] = system_enabled ? true : false;
   uint8_t light_state = (function_mode == 2 || function_mode == 3) ? 1 : 0;
   uint8_t fan_state   = (function_mode == 1 || function_mode == 3) ? 1 : 0;
-  doc["relay3"] = light_state ? true : false;  // light
-  doc["relay4"] = fan_state ? true : false;     // fan
-  doc["temp_threshold"] = (float)TEMP_THRESHOLD_C;
+  doc["relay3"] = light_state ? true : false;
+  doc["relay4"] = fan_state ? true : false;
+  doc["temp_threshold"] = TEMP_THRESHOLD_C;
   doc["light_threshold"] = LIGHT_THRESHOLD_LUX;
   char buf[256];
   serializeJson(doc, buf);
   mqttClient.publish(pubTopic.c_str(), buf);
 }
 
+// ====================== 【修复点2】真正处理上位机阈值下发 ======================
 void mqttCallback(char* topic, byte* payload, unsigned int len) {
   StaticJsonDocument<256> doc;
   if (deserializeJson(doc, payload, len)) return;
   String debug_msg; serializeJson(doc, debug_msg);
   Serial.println("\n[MQTT cmd] " + debug_msg);
   const char* cmd = doc["cmd"];
+
   if (strcmp(cmd, "get_status") == 0) {
     publishStatus();
-  } else if (strcmp(cmd, "set_relay") == 0) {
+  } 
+  else if (strcmp(cmd, "set_relay") == 0) {
     if (!system_enabled || auto_mode) return;
     int relay = doc["relay"]; bool val = doc["value"];
-    if (relay == 3) {  // light
+    if (relay == 3) {
       if (val) function_mode |= 0x02; else function_mode &= ~0x02;
-    } else if (relay == 4) {  // fan
+    } else if (relay == 4) {
       if (val) function_mode |= 0x01; else function_mode &= ~0x01;
     }
     publishStatus();
-  } else if (strcmp(cmd, "set_mode") == 0) {
+  } 
+  else if (strcmp(cmd, "set_mode") == 0) {
     if (!system_enabled) return;
     const char* mode = doc["mode"];
     if (strcmp(mode, "auto") == 0) auto_mode = true;
     else if (strcmp(mode, "manual") == 0) auto_mode = false;
     publishStatus();
-  } else if (strcmp(cmd, "set_threshold") == 0) {
-    if (doc.containsKey("temp")) ;  // would set runtime threshold
-    if (doc.containsKey("light")) ; // would set runtime threshold
+  } 
+  // ====================== 阈值修改真正生效 ======================
+  else if (strcmp(cmd, "set_threshold") == 0) {
+    if (doc.containsKey("temp")) {
+      float t = doc["temp"];
+      if (t > 0 && t < 100) {
+        TEMP_THRESHOLD_C = t;
+        Serial.println("✅ 温度阈值已更新：" + String(TEMP_THRESHOLD_C));
+      }
+    }
+    if (doc.containsKey("light")) {
+      int l = doc["light"];
+      if (l > 0 && l < 1000) {
+        LIGHT_THRESHOLD_LUX = l;
+        Serial.println("✅ 光照阈值已更新：" + String(LIGHT_THRESHOLD_LUX));
+      }
+    }
+    saveMqttConfig(); // 保存到Flash，断电不丢
     publishStatus();
   }
 }
+// ============================================================================
 
 void mqttLoop() {
   if (WiFi.status() != WL_CONNECTED) return;
@@ -252,8 +285,6 @@ void mqttLoop() {
   }
 }
 
-// ====================== [MQTT End] ===================
-
 // WiFi 实时状态检测+分级RGB【绿/蓝/黄/红】+自动重连
 void checkWiFiStatus() {
   static unsigned long lastCheck = 0;
@@ -269,11 +300,11 @@ void checkWiFiStatus() {
       wifiReconnectTimer = 0;
       int rssiPer = rssiToPercent(WiFi.RSSI());
       if(rssiPer >70){
-        setRGB(0,255,0);    //强信号：绿
+        setRGB(0,255,0);
       }else if(rssiPer>30){
-        setRGB(0,0,255);    //中信号：蓝
+        setRGB(0,0,255);
       }else{
-        setRGB(255,255,0);  //弱信号：黄
+        setRGB(255,255,0);
       }
     } else {
       if(disconnectStart == 0){
@@ -291,7 +322,6 @@ void checkWiFiStatus() {
     }
   }
 }
-// ===============================
 
 void saveWiFi(String ssid, String pwd) {
   EEPROM.write(EEPROM_FLAG_ADDR, WIFI_FLAG);
@@ -337,7 +367,6 @@ void startSmartConfig() {
   Serial.println("=====================================\n");
   Serial.flush();
 
-  // 配网时OLED先亮：正在扫描
   u8g2.clearBuffer();
   u8g2.setCursor(0, 28);
   u8g2.print("正在扫描WiFi...");
@@ -371,7 +400,6 @@ void startSmartConfig() {
   Serial.println("请输入WiFi编号：");
   Serial.flush();
 
-  // 扫描完成，提示串口输入
   u8g2.clearBuffer();
   u8g2.setCursor(0, 28);
   u8g2.print("扫描完成");
@@ -413,7 +441,6 @@ bool connectWiFi() {
   Serial.print("正在连接: "); Serial.println(targetSSID);
   Serial.flush();
 
-  // 连接中界面
   u8g2.clearBuffer();
   u8g2.setCursor(0, 28);
   u8g2.print("WiFi连接中...");
@@ -477,7 +504,6 @@ void setup() {
 
   rgbBootBlink();
 
-  // === MQTT init ===
   loadMqttConfig();
   mqttClient.setServer(mqttServer.c_str(), mqttPort);
   mqttClient.setCallback(mqttCallback);
@@ -528,11 +554,10 @@ void handle_key1() {
   }
 }
 
-// ====================== 已修改：按住2秒立即触发，无需松手 ======================
 void handle_key2() {
   static uint8_t last_key = 0;
   static unsigned long press_start = 0;
-  static bool longPressTriggered = false; // 防止重复触发
+  static bool longPressTriggered = false;
   uint8_t curr = KEY2;
 
   if (curr == 1 && last_key == 0) {
@@ -543,7 +568,6 @@ void handle_key2() {
   if (curr == 1) {
     unsigned long hold = millis() - press_start;
 
-    // 按住满2秒 → 立即切换模式，立即打印
     if (hold >= LONG_PRESS_THRESHOLD && !longPressTriggered && system_enabled) {
       longPressTriggered = true;
       auto_mode = !auto_mode;
@@ -551,13 +575,11 @@ void handle_key2() {
       Serial.flush();
     }
 
-    // 长按5秒清除WiFi
     if (hold >= RESET_WIFI_LONG_PRESS) {
       clearWiFi();
     }
   }
 
-  // 短按 → 手动模式切档位
   if (curr == 0 && last_key == 1) {
     unsigned long hold = millis() - press_start;
     if (hold < LONG_PRESS_THRESHOLD && system_enabled && !auto_mode) {
@@ -570,7 +592,6 @@ void handle_key2() {
 
   last_key = curr;
 }
-// ============================================================================
 
 void update_outputs() {
   if (system_enabled) {
@@ -602,7 +623,7 @@ void update_outputs() {
         u8g2.setCursor(0,58);
         if(wifi_connected){
           u8g2.print("WiFi:");u8g2.print(local_IP.toString());
-          u8g2.print("   "); // 3个空格
+          u8g2.print("   ");
           u8g2.setCursor(105,58);u8g2.print(rssiToPercent(WiFi.RSSI()));u8g2.print("%");
         }else{
           if(millis()-disconnectStartDisp < SHOW_FAIL_TIME){
@@ -661,7 +682,7 @@ void update_outputs() {
         u8g2.setCursor(0,58);
         if (wifi_connected) {
           u8g2.print("WiFi:"); u8g2.print(local_IP.toString());
-          u8g2.print("   "); // 3个空格
+          u8g2.print("   ");
           u8g2.setCursor(105,58); u8g2.print(rssiToPercent(WiFi.RSSI())); u8g2.print("%");
         } else {
           if(millis()-disconnectStartDisp < SHOW_FAIL_TIME){
