@@ -20,7 +20,7 @@
 *{margin:0;padding:0;box-sizing:border-box;transition:background-color .3s,color .3s;}
 body{background:var(--bg);color:var(--text);display:flex;height:100vh;}
 
-/* 侧边栏（产品说明书章节） */
+/* 侧边栏（仅产品说明书章节） */
 .sidebar{
   width:260px;background:var(--sidebg);
   border-right:1px solid var(--border);
@@ -50,6 +50,7 @@ nav a:hover{color:var(--accent);}
 h2{color:var(--accent);margin:30px 0 15px;padding-bottom:5px;border-bottom:1px solid var(--border);}
 p{margin-bottom:15px;line-height:1.8;}
 ul{margin-left:20px;margin-bottom:15px;line-height:1.8;}
+code{background:var(--sidebg);padding:2px 4px;border-radius:4px;}
 footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin-top:auto;}
 
 #themeToggle{
@@ -62,23 +63,25 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
 <body>
 
 <div class="sidebar">
-  <h2>📘 产品说明书目录</h2>
+  <h2>📘 代码模块说明目录</h2>
   <ul>
-    <li><a href="#intro" class="active">一、产品概述</a></li>
-    <li><a href="#hardware">二、硬件组成</a></li>
-    <li><a href="#function">三、功能说明</a></li>
-    <li><a href="#control">四、控制逻辑</a></li>
-    <li><a href="#mqtt">五、MQTT 通信协议</a></li>
-    <li><a href="#ui">六、显示与交互</a></li>
-    <li><a href="#rgb">七、RGB 状态指示</a></li>
-    <li><a href="#use">八、使用与维护</a></li>
+    <li><a href="#intro" class="active">一、系统概述与整体架构</a></li>
+    <li><a href="#hardware">二、硬件引脚与外设配置</a></li>
+    <li><a href="#freertos">三、FreeRTOS 双线程核心</a></li>
+    <li><a href="#rgb">四、RGB 彩灯状态机实现</a></li>
+    <li><a href="#wifi">五、WiFi 连接与自动重连</a></li>
+    <li><a href="#mqtt">六、MQTT 通信与指令处理</a></li>
+    <li><a href="#key">七、按键逻辑与模式切换</a></li>
+    <li><a href="#sensor">八、传感器采集与滤波处理</a></li>
+    <li><a href="#oled">九、OLED 显示与状态刷新</a></li>
+    <li><a href="#eeprom">十、参数持久化与配置管理</a></li>
     <li><a href="index.html">← 返回首页</a></li>
   </ul>
 </div>
 
 <div class="main">
   <header>
-    <h1>PCT-100 化工控制实训装置 — 产品说明书</h1>
+    <h1>PCT-100 化工控制实训装置 — 代码模块说明书</h1>
   </header>
   <nav>
     <a href="index.html">首页</a>
@@ -88,97 +91,121 @@ footer{background:var(--sidebg);text-align:center;padding:20px;color:#777;margin
   </nav>
   <div class="container">
     <div class="section" id="intro">
-      <h2>一、产品概述</h2>
-      <p>PCT-100 是一套基于 ESP32-C3 的化工过程控制实训装置，面向高校自动化、物联网、嵌入式教学。实现温度、光照采集与自动控制、WiFi-MQTT 远程监控、OLED 显示、RGB 状态指示、按键操作等一体化功能。</p>
-      <p>装置以化工自动化典型场景为蓝本，模拟工业环境下温度、光照等参数的监测与自动调节，帮助学生掌握传感器技术、自动控制算法、物联网通信协议、嵌入式软件开发等核心能力。</p>
+      <h2>一、系统概述与整体架构</h2>
+      <p>本项目基于 ESP32-C3 开发，采用 FreeRTOS 多线程架构，将任务划分为三大模块：</p>
+      <ul>
+        <li><strong>通信线程：</strong>WiFi-MQTT 连接管理、数据收发、远程指令处理</li>
+        <li><strong>状态指示线程：</strong>RGB 彩灯状态机，实时反映设备运行状态</li>
+        <li><strong>主线程：</strong>按键处理、传感器采集、控制逻辑、OLED 显示</li>
+      </ul>
+      <p>核心变量通过 `portENTER_CRITICAL` 互斥锁保护，避免多线程数据竞争，保证系统稳定性。</p>
     </div>
 
     <div class="section" id="hardware">
-      <h2>二、硬件组成</h2>
+      <h2>二、硬件引脚与外设配置</h2>
+      <p>代码开头定义了所有外设的引脚与参数，和硬件设计一一对应：</p>
       <ul>
-        <li>主控：ESP32-C3（WiFi+蓝牙），主频 160MHz，内置 4MB Flash，支持 FreeRTOS 多线程</li>
-        <li>温度采集：DS18B20 数字温度传感器，单总线，分辨率 0.0625℃，测温范围 -55℃~125℃</li>
-        <li>光照采集：光敏电阻模块，ADC 采集分压电压，反映环境光照强度</li>
-        <li>显示：0.96 寸 I2C OLED，128×64 像素，实时显示温度、光照、WiFi 状态、MQTT 连接状态</li>
-        <li>状态指示：WS2812 RGB 彩灯，6 种颜色对应 6 种设备运行状态</li>
-        <li>执行器：5V 继电器驱动风扇（散热）、LED 补光灯（补光）</li>
-        <li>输入：独立按键×3，K1 启停、K2 模式切换、K3 阈值调节/长按 WiFi 重置</li>
-        <li>通信：WiFi 2.4GHz、MQTT 协议，支持远程监控与指令下发</li>
+        <li><strong>WS2812 RGB 灯：</strong>引脚 0，单灯模式，使用 FastLED 驱动</li>
+        <li><strong>DS18B20 温度传感器：</strong>引脚 10，单总线通信，OneWire 库驱动</li>
+        <li><strong>光敏电阻：</strong>引脚 1，ADC 采集，分压电路实现光照检测</li>
+        <li><strong>OLED 显示屏：</strong>I2C 总线，SDA=4，SCL=5，U8g2 库驱动 128×64 显示</li>
+        <li><strong>继电器与按键：</strong>在 `exit.h`、`key.h` 中定义，控制风扇、LED 灯与系统启停</li>
       </ul>
     </div>
 
-    <div class="section" id="function">
-      <h2>三、功能说明</h2>
-      <p><strong>1. 数据采集</strong><br>温度、光照实时采集，OLED 每秒刷新数据，本地可查看实时值；软件采用滑动平均滤波，抑制干扰，数据稳定。</p>
-      <p><strong>2. 自动控制</strong><br>温度高于设定阈值时自动开启风扇散热；光照低于设定阈值时自动开启 LED 补光；阈值支持三级可调，断电自动保存。</p>
-      <p><strong>3. MQTT 远程监控</strong><br>连接 MQTT 服务器，定时上传温度、光照、设备状态；支持远程启停、模式切换、阈值设置、风扇/灯控制。</p>
-      <p><strong>4. RGB 状态显示</strong><br>绿色：正常运行；红色：温度报警；蓝色：WiFi 未连接；黄色：MQTT 离线；青色：风扇开启；紫色：灯光开启。</p>
-      <p><strong>5. 按键操作</strong><br>K1：系统启停；K2：自动/手动切换；K3：阈值档位调节；长按 K3 3 秒重置 WiFi 配置，进入配网模式。</p>
-    </div>
-
-    <div class="section" id="control">
-      <h2>四、控制逻辑</h2>
-      <p>系统分为自动模式和手动模式两种工作状态：</p>
+    <div class="section" id="freertos">
+      <h2>三、FreeRTOS 双线程核心</h2>
+      <p>系统创建两个独立线程，和主线程并行运行：</p>
       <ul>
-        <li><strong>自动模式：</strong>设备根据采集到的温度和光照数据，与设定阈值进行比较，自动控制风扇和LED灯的开关。当温度超过阈值时，风扇自动开启散热；当光照强度低于阈值时，LED灯自动开启补光。</li>
-        <li><strong>手动模式：</strong>用户可以通过本地按键或远程MQTT指令，直接控制风扇和LED灯的开关状态，优先级高于自动模式。</li>
+        <li><strong>WiFi-MQTT 线程（`wifiMqttTask`）：</strong>高优先级，负责 WiFi 连接管理、MQTT 重连、数据发布与指令接收，保证通信实时性</li>
+        <li><strong>RGB 彩灯线程（`rgbLedTask`）：</strong>中等优先级，独立运行状态机，不阻塞主线程的传感器与控制逻辑</li>
       </ul>
-      <p>控制逻辑中加入了防抖和延时处理，避免设备频繁启停，延长使用寿命。</p>
-    </div>
-
-    <div class="section" id="mqtt">
-      <h2>五、MQTT 通信协议</h2>
-      <p>设备使用MQTT协议与服务器进行通信，实现数据上传和指令下发：</p>
-      <ul>
-        <li><strong>数据上传主题：</strong> `chemctrl/设备ID/status`，设备定时上传温度、光照、工作模式、设备状态等信息。</li>
-        <li><strong>指令接收主题：</strong> `chemctrl/设备ID/command`，设备订阅该主题，接收远程控制指令，如启停、模式切换、阈值设置等。</li>
-      </ul>
-      <p>通信数据采用JSON格式，便于解析和扩展。</p>
-    </div>
-
-    <div class="section" id="ui">
-      <h2>六、显示与交互</h2>
-      <p>设备配备0.96寸I2C OLED显示屏，提供丰富的本地交互信息：</p>
-      <ul>
-        <li>实时显示温度、光照强度数据</li>
-        <li>显示当前工作模式（自动/手动）</li>
-        <li>显示风扇和LED灯的工作状态</li>
-        <li>显示WiFi连接状态和信号强度</li>
-        <li>显示系统运行状态和错误提示</li>
-      </ul>
-      <p>显示屏每秒刷新一次数据，确保用户可以实时掌握设备运行情况。</p>
+      <p>线程间通过全局变量与互斥锁通信，避免数据竞争，实现功能解耦。</p>
     </div>
 
     <div class="section" id="rgb">
-      <h2>七、RGB 状态指示</h2>
-      <p>设备上的WS2812 RGB彩灯提供6种不同的颜色状态，直观反映设备运行情况：</p>
+      <h2>四、RGB 彩灯状态机实现</h2>
+      <p>`rgbLedTask` 线程中实现了 6 种状态的彩灯控制，和设备状态一一对应：</p>
       <ul>
-        <li><strong>绿色：</strong>系统正常运行，无异常状态</li>
-        <li><strong>红色：</strong>温度超过设定阈值，处于报警状态</li>
-        <li><strong>蓝色：</strong>WiFi未连接或连接失败</li>
-        <li><strong>黄色：</strong>MQTT服务器连接失败或断开</li>
-        <li><strong>青色：</strong>风扇处于开启状态</li>
-        <li><strong>紫色：</strong>LED补光灯处于开启状态</li>
+        <li>模式1：红灯+绿灯+蓝灯交替闪烁（报警+风扇+灯光开启）</li>
+        <li>模式2：红/绿/蓝三色交替闪烁（温度报警+光照报警+正常）</li>
+        <li>模式3：红→绿→蓝渐变切换（温度/光照正常，风扇运行）</li>
+        <li>模式4：彩虹渐变循环（MQTT 离线）</li>
+        <li>模式5：红/绿快速交替（WiFi 未连接）</li>
+        <li>模式6：绿/蓝/青渐变循环（正常运行状态）</li>
       </ul>
+      <p>代码中实现了渐变效果函数 `rgbGradualStart`，支持平滑过渡，避免灯效突变。</p>
     </div>
 
-    <div class="section" id="use">
-      <h2>八、使用与维护</h2>
-      <p><strong>使用步骤：</strong></p>
-      <ol>
-        <li>连接5V电源，OLED显示开机画面与设备信息</li>
-        <li>首次使用长按K3按键3秒，进入WiFi配网模式</li>
-        <li>通过手机或电脑连接设备热点，完成WiFi配置</li>
-        <li>配网成功后，设备将自动连接MQTT服务器，进入正常运行状态</li>
-        <li>用户可通过本地按键或远程平台对设备进行监控和控制</li>
-      </ol>
-      <p><strong>维护注意事项：</strong></p>
+    <div class="section" id="wifi">
+      <h2>五、WiFi 连接与自动重连</h2>
+      <p>WiFi 管理模块包含三大功能：</p>
       <ul>
-        <li>避免设备在潮湿、高温、强静电环境下使用</li>
-        <li>传感器和执行器应轻拿轻放，避免弯折和撞击</li>
-        <li>定期检查接线是否松动，供电是否稳定</li>
-        <li>长时间不使用时，请断开设备电源</li>
+        <li><strong>WiFi 信息持久化：</strong>使用 EEPROM 保存 WiFi SSID 和密码，上电自动读取</li>
+        <li><strong>自动重连机制：</strong>掉线后每 3 秒尝试重连一次，`wifiReconnectTimer` 控制重试间隔</li>
+        <li><strong>配网模式：</strong>长按按键进入配网，串口输入 WiFi 信息，支持扫描附近 WiFi 列表</li>
       </ul>
+      <p>连接状态通过 `wifi_connected` 变量标记，供其他模块使用。</p>
+    </div>
+
+    <div class="section" id="mqtt">
+      <h2>六、MQTT 通信与指令处理</h2>
+      <p>MQTT 模块实现了完整的发布/订阅功能：</p>
+      <ul>
+        <li><strong>主题定义：</strong>上行主题 `chemctrl/设备ID/status`，下行主题 `chemctrl/设备ID/command`</li>
+        <li><strong>数据发布：</strong>定时上传温度、光照、模式、设备状态，JSON 格式封装</li>
+        <li><strong>指令处理：</strong>支持 `get_status`、`set_relay`、`set_mode`、`set_threshold` 四类指令</li>
+        <li><strong>配置管理：</strong>使用 Preferences 保存 MQTT 服务器地址、端口、用户名、密码</li>
+      </ul>
+      <p>回调函数 `mqttCallback` 负责解析指令并执行对应操作，支持远程控制与参数修改。</p>
+    </div>
+
+    <div class="section" id="key">
+      <h2>七、按键逻辑与模式切换</h2>
+      <p>三个按键分别实现不同功能，支持短按、长按、长按重置：</p>
+      <ul>
+        <li><strong>K1：系统启停</strong>：短按切换系统开启/关闭，控制所有外设电源</li>
+        <li><strong>K2：模式切换</strong>：短按切换自动/手动模式，长按（2秒）切换模式，长按（5秒）重置 WiFi</li>
+        <li><strong>K3：档位调节</strong>：手动模式下短按切换风扇/LED 档位，共 4 种状态</li>
+      </ul>
+      <p>按键处理加入防抖延时，避免误触发，逻辑封装在 `handle_key1`、`handle_key2` 函数中。</p>
+    </div>
+
+    <div class="section" id="sensor">
+      <h2>八、传感器采集与滤波处理</h2>
+      <p>传感器模块实现了温度和光照的采集、滤波与控制逻辑：</p>
+      <ul>
+        <li><strong>温度采集：</strong>DS18B20 单总线读取，分辨率 0.0625℃，每秒刷新一次</li>
+        <li><strong>光照采集：</strong>光敏电阻 ADC 采集，滑动平均滤波（窗口大小 5），抑制干扰</li>
+        <li><strong>阈值控制：</strong>温度/光照阈值支持本地按键和远程 MQTT 修改，断电保存</li>
+        <li><strong>滞回控制：</strong>光照控制加入 60 个单位的滞回值，避免频繁开关 LED</li>
+      </ul>
+      <p>采集数据通过互斥锁保护，供多线程读取，保证数据一致性。</p>
+    </div>
+
+    <div class="section" id="oled">
+      <h2>九、OLED 显示与状态刷新</h2>
+      <p>OLED 显示模块每秒刷新一次，显示所有关键状态：</p>
+      <ul>
+        <li>温度、光照实时数据，与阈值对比显示</li>
+        <li>系统模式（自动/手动）、设备总闸状态</li>
+        <li>风扇、LED 灯的开关状态</li>
+        <li>WiFi 连接状态、IP 地址、信号强度百分比</li>
+        <li>重连状态提示（5秒内显示“重连中”，超时显示“重连失败”）</li>
+      </ul>
+      <p>使用 U8g2 库驱动，支持中文显示，字体为 `u8g2_font_wqy12_t_gb2312`。</p>
+    </div>
+
+    <div class="section" id="eeprom">
+      <h2>十、参数持久化与配置管理</h2>
+      <p>系统使用 EEPROM 和 Preferences 实现参数持久化：</p>
+      <ul>
+        <li><strong>WiFi 配置：</strong>SSID 和密码保存在 EEPROM 中，上电自动读取</li>
+        <li><strong>MQTT 配置：</strong>服务器地址、端口、用户名、密码保存在 Preferences 中</li>
+        <li><strong>控制参数：</strong>温度阈值、光照阈值保存在 Preferences 中，修改后自动保存</li>
+        <li><strong>重置功能：</strong>长按按键清除 WiFi 配置，进入配网模式</li>
+      </ul>
+      <p>所有配置修改后立即写入存储，断电不丢失，重启后自动加载。</p>
     </div>
   </div>
   <footer>
