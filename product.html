@@ -5,116 +5,110 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>产品说明书 - PCT-100</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
+        :root {
+            --bg: #1a1a1a;
+            --text: #e0e0e0;
+            --sidebar-bg: #252525;
+            --content-bg: #222;
+            --border: #333;
+            --accent: #66dd88;
+            --nav-bg: #0f3020;
         }
-        body {
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            line-height: 1.8;
+        .light-mode {
+            --bg: #ffffff;
+            --text: #121212;
+            --sidebar-bg: #f7f7f7;
+            --content-bg: #ffffff;
+            --border: #ddd;
+            --accent: #2980b9;
+            --nav-bg: #e8f5e9;
         }
-        header {
-            background-color: #0f3020;
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 2px solid #228855;
-        }
-        h1 {
-            color: #ffffff;
-            font-size: 24px;
-        }
-        nav {
-            background-color: #222;
-            padding: 10px 0;
-            text-align: center;
-        }
-        nav a {
-            color: #aaa;
-            text-decoration: none;
-            margin: 0 15px;
-        }
-        nav a:hover {
-            color: #66dd88;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        h2 {
-            color: #66dd88;
-            margin: 30px 0 15px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #333;
-        }
-        p {
-            margin-bottom: 15px;
-        }
-        ul {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-        footer {
-            background-color: #222;
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            margin-top: 40px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; transition: background-color 0.3s, color 0.3s; }
+        body { background-color: var(--bg); color: var(--text); display: flex; height: 100vh; }
+        /* 侧边目录 */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
+        .sidebar h2 { color: var(--accent); margin-bottom: 20px; font-size: 18px; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin: 10px 0; }
+        .sidebar a { color: var(--text); text-decoration: none; display: block; padding: 8px 10px; border-radius: 4px; }
+        .sidebar a:hover, .sidebar a.active { background-color: var(--accent); color: #fff; }
+        /* 主内容区 */
+        .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        header { background-color: var(--nav-bg); padding: 20px; text-align: center; border-bottom: 1px solid var(--border); }
+        header h1 { color: #fff; font-size: 24px; }
+        nav { background-color: var(--sidebar-bg); padding: 10px; text-align: center; border-bottom: 1px solid var(--border); }
+        nav a { color: var(--text); text-decoration: none; margin: 0 15px; }
+        nav a:hover { color: var(--accent); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        h2 { color: var(--accent); margin: 30px 0 15px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+        p { margin-bottom: 15px; line-height: 1.8; }
+        ul { margin-left: 20px; margin-bottom: 15px; line-height: 1.8; }
+        footer { background-color: var(--sidebar-bg); text-align: center; padding: 20px; color: #777; margin-top: auto; }
+        #themeToggle { position: fixed; top: 20px; right: 30px; padding: 8px 16px; background-color: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>PCT-100 化工控制实训装置 — 产品说明书</h1>
-    </header>
-    <nav>
-        <a href="index.html">首页</a>
-        <a href="product.html">产品说明书</a>
-        <a href="tech.html">技术原理</a>
-        <a href="about.html">关于项目</a>
-    </nav>
-    <div class="container">
-        <h2>一、产品概述</h2>
-        <p>PCT-100 是一套基于 ESP32-C3 的化工过程控制实训装置，面向高校自动化、物联网、嵌入式教学。实现温度、光照采集与自动控制、WiFi-MQTT 远程监控、OLED 显示、RGB 状态指示、按键操作等一体化功能。</p>
-
-        <h2>二、硬件组成</h2>
+    <div class="sidebar">
+        <h2>📘 产品目录</h2>
         <ul>
-            <li>主控：ESP32-C3（WiFi+蓝牙）</li>
-            <li>温度采集：DS18B20 数字温度传感器</li>
-            <li>光照采集：光敏电阻模块</li>
-            <li>显示：0.96 寸 I2C OLED</li>
-            <li>状态指示：RGB 彩灯（6 种状态色）</li>
-            <li>执行器：风扇、LED 灯</li>
-            <li>输入：独立按键×3</li>
-            <li>通信：WiFi 2.4GHz、MQTT</li>
+            <li><a href="index.html">首页</a></li>
+            <li><a href="product.html" class="active">产品说明书</a></li>
+            <li><a href="tech.html">技术原理</a></li>
+            <li><a href="about.html">关于项目</a></li>
         </ul>
-
-        <h2>三、功能说明</h2>
-        <p><strong>1. 数据采集</strong><br>温度、光照实时采集，OLED 每秒刷新，本地可查看实时值。</p>
-        <p><strong>2. 自动控制</strong><br>温度高于阈值自动开风扇；光照低于阈值自动补光；支持本地按键或远程修改阈值。</p>
-        <p><strong>3. MQTT 远程监控</strong><br>连接 MQTT 服务器，定时上传温度/光照/设备状态；支持远程下发指令：启停、模式切换、阈值设置、风扇/灯控制。</p>
-        <p><strong>4. RGB 状态显示</strong><br>绿色：正常运行；红色：温度报警；蓝色：WiFi 未连接；黄色：MQTT 离线；青色：风扇开启；紫色：灯光开启。</p>
-        <p><strong>5. 按键操作</strong><br>K1：系统启停；K2：自动/手动切换；K3：阈值档位调节；长按 K3 可重置 WiFi 配置。</p>
-
-        <h2>四、电气与接口</h2>
-        <p>供电：DC 5V/1A；接口：USB-C、传感器接口、执行器接口、I2C 接口。</p>
-
-        <h2>五、使用步骤</h2>
-        <ul>
-            <li>1. 连接电源，OLED 显示开机信息</li>
-            <li>2. 首次使用长按 K3，进入 WiFi 配网模式</li>
-            <li>3. 配网成功后自动连接 MQTT</li>
-            <li>4. 本地按键或远程平台监控控制</li>
-        </ul>
-
-        <h2>六、维护与注意</h2>
-        <p>避免强静电、潮湿环境；传感器轻拿轻放；定期检查接线与供电。</p>
     </div>
-    <footer>
-        <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
-    </footer>
+    <div class="main">
+        <header>
+            <h1>PCT-100 化工控制实训装置 — 产品说明书</h1>
+        </header>
+        <nav>
+            <a href="index.html">首页</a>
+            <a href="product.html">产品说明书</a>
+            <a href="tech.html">技术原理</a>
+            <a href="about.html">关于项目</a>
+        </nav>
+        <div class="container">
+            <h2>一、产品概述</h2>
+            <p>PCT-100 是一套基于 ESP32-C3 的化工过程控制实训装置，面向高校自动化、物联网、嵌入式教学。实现温度、光照采集与自动控制、WiFi-MQTT 远程监控、OLED 显示、RGB 状态指示、按键操作等一体化功能。</p>
+
+            <h2>二、硬件组成</h2>
+            <ul>
+                <li>主控：ESP32-C3（WiFi+蓝牙）</li>
+                <li>温度采集：DS18B20 数字温度传感器</li>
+                <li>光照采集：光敏电阻模块</li>
+                <li>显示：0.96 寸 I2C OLED</li>
+                <li>状态指示：RGB 彩灯（6 种状态色）</li>
+                <li>执行器：风扇、LED 灯</li>
+                <li>输入：独立按键×3</li>
+                <li>通信：WiFi 2.4GHz、MQTT</li>
+            </ul>
+
+            <h2>三、功能说明</h2>
+            <p><strong>1. 数据采集</strong><br>温度、光照实时采集，OLED 每秒刷新，本地可查看实时值。</p>
+            <p><strong>2. 自动控制</strong><br>温度高于阈值自动开风扇；光照低于阈值自动补光；支持本地按键或远程修改阈值。</p>
+            <p><strong>3. MQTT 远程监控</strong><br>连接 MQTT 服务器，定时上传温度/光照/设备状态；支持远程下发指令：启停、模式切换、阈值设置、风扇/灯控制。</p>
+            <p><strong>4. RGB 状态显示</strong><br>绿色：正常运行；红色：温度报警；蓝色：WiFi 未连接；黄色：MQTT 离线；青色：风扇开启；紫色：灯光开启。</p>
+            <p><strong>5. 按键操作</strong><br>K1：系统启停；K2：自动/手动切换；K3：阈值档位调节；长按 K3 可重置 WiFi 配置。</p>
+
+            <h2>四、电气与接口</h2>
+            <p>供电：DC 5V/1A；接口：USB-C、传感器接口、执行器接口、I2C 接口。</p>
+
+            <h2>五、使用步骤</h2>
+            <ul>
+                <li>1. 连接电源，OLED 显示开机信息</li>
+                <li>2. 首次使用长按 K3，进入 WiFi 配网模式</li>
+                <li>3. 配网成功后自动连接 MQTT</li>
+                <li>4. 本地按键或远程平台监控控制</li>
+            </ul>
+
+            <h2>六、维护与注意</h2>
+            <p>避免强静电、潮湿环境；传感器轻拿轻放；定期检查接线与供电。</p>
+        </div>
+        <footer>
+            <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
+        </footer>
+    </div>
+    <button id="themeToggle">切换浅色模式</button>
+    <script src="theme.js"></script>
 </body>
 </html>

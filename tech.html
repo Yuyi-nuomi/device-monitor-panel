@@ -5,112 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>技术原理 - PCT-100</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
+        :root {
+            --bg: #1a1a1a;
+            --text: #e0e0e0;
+            --sidebar-bg: #252525;
+            --content-bg: #222;
+            --border: #333;
+            --accent: #66dd88;
+            --nav-bg: #0f3020;
         }
-        body {
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            line-height: 1.8;
+        .light-mode {
+            --bg: #ffffff;
+            --text: #121212;
+            --sidebar-bg: #f7f7f7;
+            --content-bg: #ffffff;
+            --border: #ddd;
+            --accent: #2980b9;
+            --nav-bg: #e8f5e9;
         }
-        header {
-            background-color: #0f3020;
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 2px solid #228855;
-        }
-        h1 {
-            color: #ffffff;
-            font-size: 24px;
-        }
-        nav {
-            background-color: #222;
-            padding: 10px 0;
-            text-align: center;
-        }
-        nav a {
-            color: #aaa;
-            text-decoration: none;
-            margin: 0 15px;
-        }
-        nav a:hover {
-            color: #66dd88;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        h2 {
-            color: #66dd88;
-            margin: 30px 0 15px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #333;
-        }
-        p {
-            margin-bottom: 15px;
-        }
-        ul {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-        footer {
-            background-color: #222;
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            margin-top: 40px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; transition: background-color 0.3s, color 0.3s; }
+        body { background-color: var(--bg); color: var(--text); display: flex; height: 100vh; }
+        /* 侧边目录 */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
+        .sidebar h2 { color: var(--accent); margin-bottom: 20px; font-size: 18px; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin: 10px 0; }
+        .sidebar a { color: var(--text); text-decoration: none; display: block; padding: 8px 10px; border-radius: 4px; }
+        .sidebar a:hover, .sidebar a.active { background-color: var(--accent); color: #fff; }
+        /* 主内容区 */
+        .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        header { background-color: var(--nav-bg); padding: 20px; text-align: center; border-bottom: 1px solid var(--border); }
+        header h1 { color: #fff; font-size: 24px; }
+        nav { background-color: var(--sidebar-bg); padding: 10px; text-align: center; border-bottom: 1px solid var(--border); }
+        nav a { color: var(--text); text-decoration: none; margin: 0 15px; }
+        nav a:hover { color: var(--accent); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        h2 { color: var(--accent); margin: 30px 0 15px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+        p { margin-bottom: 15px; line-height: 1.8; }
+        ul { margin-left: 20px; margin-bottom: 15px; line-height: 1.8; }
+        footer { background-color: var(--sidebar-bg); text-align: center; padding: 20px; color: #777; margin-top: auto; }
+        #themeToggle { position: fixed; top: 20px; right: 30px; padding: 8px 16px; background-color: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>技术原理与开发日志 - PCT-100</h1>
-    </header>
-    <nav>
-        <a href="index.html">首页</a>
-        <a href="product.html">产品说明书</a>
-        <a href="tech.html">技术原理</a>
-        <a href="about.html">关于项目</a>
-    </nav>
-    <div class="container">
-        <h2>一、整体架构</h2>
-        <p>采用 ESP32-C3 + FreeRTOS 多线程架构：一个线程负责 WiFi-MQTT 通信与数据收发，一个线程负责传感器采集、控制逻辑与 OLED 刷新，主线程处理按键与状态机切换。</p>
-
-        <h2>二、传感器采集原理</h2>
-        <p><strong>温度（DS18B20）</strong><br>单总线数字传感器，MCU 发送复位/读写指令，读取 16 位温度数据，分辨率 0.0625℃。</p>
-        <p><strong>光照（光敏电阻）</strong><br>分压电路将光强转为电压，ADC 采集电压值映射为光照等级，用于自动补光判断。</p>
-
-        <h2>三、控制逻辑</h2>
-        <p>系统分为自动/手动模式：</p>
+    <div class="sidebar">
+        <h2>📘 技术目录</h2>
         <ul>
-            <li>自动：温度＞阈值→风扇开；光照＜阈值→LED 开</li>
-            <li>手动：本地或远程直接控制风扇、LED 开关</li>
-        </ul>
-        <p>阈值支持三级可调，断电自动保存至 Flash。</p>
-
-        <h2>四、WiFi 与 MQTT 通信</h2>
-        <p>WiFi 支持 2.4GHz，配网成功后自动重连；MQTT 采用标准主题：上行（设备→服务器）发布状态与数据，下行（服务器→设备）订阅控制指令，实现双向通信。</p>
-
-        <h2>五、RGB 状态机</h2>
-        <p>6 种颜色对应 6 种设备状态，由系统状态变量驱动，实时更新，便于快速判断设备运行情况。</p>
-
-        <h2>六、开发日志</h2>
-        <ul>
-            <li>2025-11：需求确定、器件选型、原理图设计</li>
-            <li>2025-12：PCB 绘制、焊接与硬件调试</li>
-            <li>2026-01：FreeRTOS 多线程框架搭建</li>
-            <li>2026-02：传感器驱动、OLED 显示、按键逻辑完成</li>
-            <li>2026-03：WiFi-MQTT 通信、远程控制功能完成</li>
-            <li>2026-04：RGB 状态指示、阈值保存、稳定性优化</li>
-            <li>2026-05：整机联调、文档编写、实训案例整理</li>
+            <li><a href="index.html">首页</a></li>
+            <li><a href="product.html">产品说明书</a></li>
+            <li><a href="tech.html" class="active">技术原理</a></li>
+            <li><a href="about.html">关于项目</a></li>
         </ul>
     </div>
-    <footer>
-        <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
-    </footer>
+    <div class="main">
+        <header>
+            <h1>技术原理与开发日志 - PCT-100</h1>
+        </header>
+        <nav>
+            <a href="index.html">首页</a>
+            <a href="product.html">产品说明书</a>
+            <a href="tech.html">技术原理</a>
+            <a href="about.html">关于项目</a>
+        </nav>
+        <div class="container">
+            <h2>一、整体架构</h2>
+            <p>采用 ESP32-C3 + FreeRTOS 多线程架构：一个线程负责 WiFi-MQTT 通信与数据收发，一个线程负责传感器采集、控制逻辑与 OLED 刷新，主线程处理按键与状态机切换。</p>
+
+            <h2>二、传感器采集原理</h2>
+            <p><strong>温度（DS18B20）</strong><br>单总线数字传感器，MCU 发送复位/读写指令，读取 16 位温度数据，分辨率 0.0625℃。</p>
+            <p><strong>光照（光敏电阻）</strong><br>分压电路将光强转为电压，ADC 采集电压值映射为光照等级，用于自动补光判断。</p>
+
+            <h2>三、控制逻辑</h2>
+            <p>系统分为自动/手动模式：</p>
+            <ul>
+                <li>自动：温度＞阈值→风扇开；光照＜阈值→LED 开</li>
+                <li>手动：本地或远程直接控制风扇、LED 开关</li>
+            </ul>
+            <p>阈值支持三级可调，断电自动保存至 Flash。</p>
+
+            <h2>四、WiFi 与 MQTT 通信</h2>
+            <p>WiFi 支持 2.4GHz，配网成功后自动重连；MQTT 采用标准主题：上行（设备→服务器）发布状态与数据，下行（服务器→设备）订阅控制指令，实现双向通信。</p>
+
+            <h2>五、RGB 状态机</h2>
+            <p>6 种颜色对应 6 种设备状态，由系统状态变量驱动，实时更新，便于快速判断设备运行情况。</p>
+
+            <h2>六、开发日志</h2>
+            <ul>
+                <li>2025-11：需求确定、器件选型、原理图设计</li>
+                <li>2025-12：PCB 绘制、焊接与硬件调试</li>
+                <li>2026-01：FreeRTOS 多线程框架搭建</li>
+                <li>2026-02：传感器驱动、OLED 显示、按键逻辑完成</li>
+                <li>2026-03：WiFi-MQTT 通信、远程控制功能完成</li>
+                <li>2026-04：RGB 状态指示、阈值保存、稳定性优化</li>
+                <li>2026-05：整机联调、文档编写、实训案例整理</li>
+            </ul>
+        </div>
+        <footer>
+            <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
+        </footer>
+    </div>
+    <button id="themeToggle">切换浅色模式</button>
+    <script src="theme.js"></script>
 </body>
 </html>

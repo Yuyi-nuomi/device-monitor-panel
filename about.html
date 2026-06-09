@@ -5,96 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>关于项目 - PCT-100</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
+        :root {
+            --bg: #1a1a1a;
+            --text: #e0e0e0;
+            --sidebar-bg: #252525;
+            --content-bg: #222;
+            --border: #333;
+            --accent: #66dd88;
+            --nav-bg: #0f3020;
         }
-        body {
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            line-height: 1.8;
+        .light-mode {
+            --bg: #ffffff;
+            --text: #121212;
+            --sidebar-bg: #f7f7f7;
+            --content-bg: #ffffff;
+            --border: #ddd;
+            --accent: #2980b9;
+            --nav-bg: #e8f5e9;
         }
-        header {
-            background-color: #0f3020;
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 2px solid #228855;
-        }
-        h1 {
-            color: #ffffff;
-            font-size: 24px;
-        }
-        nav {
-            background-color: #222;
-            padding: 10px 0;
-            text-align: center;
-        }
-        nav a {
-            color: #aaa;
-            text-decoration: none;
-            margin: 0 15px;
-        }
-        nav a:hover {
-            color: #66dd88;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        h2 {
-            color: #66dd88;
-            margin: 30px 0 15px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #333;
-        }
-        p {
-            margin-bottom: 15px;
-        }
-        footer {
-            background-color: #222;
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            margin-top: 40px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; transition: background-color 0.3s, color 0.3s; }
+        body { background-color: var(--bg); color: var(--text); display: flex; height: 100vh; }
+        /* 侧边目录 */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
+        .sidebar h2 { color: var(--accent); margin-bottom: 20px; font-size: 18px; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin: 10px 0; }
+        .sidebar a { color: var(--text); text-decoration: none; display: block; padding: 8px 10px; border-radius: 4px; }
+        .sidebar a:hover, .sidebar a.active { background-color: var(--accent); color: #fff; }
+        /* 主内容区 */
+        .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        header { background-color: var(--nav-bg); padding: 20px; text-align: center; border-bottom: 1px solid var(--border); }
+        header h1 { color: #fff; font-size: 24px; }
+        nav { background-color: var(--sidebar-bg); padding: 10px; text-align: center; border-bottom: 1px solid var(--border); }
+        nav a { color: var(--text); text-decoration: none; margin: 0 15px; }
+        nav a:hover { color: var(--accent); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        h2 { color: var(--accent); margin: 30px 0 15px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+        p { margin-bottom: 15px; line-height: 1.8; }
+        ul { margin-left: 20px; margin-bottom: 15px; line-height: 1.8; }
+        footer { background-color: var(--sidebar-bg); text-align: center; padding: 20px; color: #777; margin-top: auto; }
+        #themeToggle { position: fixed; top: 20px; right: 30px; padding: 8px 16px; background-color: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>关于项目与团队 - PCT-100</h1>
-    </header>
-    <nav>
-        <a href="index.html">首页</a>
-        <a href="product.html">产品说明书</a>
-        <a href="tech.html">技术原理</a>
-        <a href="about.html">关于项目</a>
-    </nav>
-    <div class="container">
-        <h2>一、项目背景</h2>
-        <p>化工自动化与物联网技术发展迅速，高校教学亟需低成本、高集成、易上手的实训平台。PCT-100 旨在填补教学设备缺口，覆盖嵌入式、传感器、自动控制、物联网通信等核心知识点，满足课程设计、实训教学与竞赛需求。</p>
-
-        <h2>二、项目目标</h2>
+    <div class="sidebar">
+        <h2>📘 关于项目</h2>
         <ul>
-            <li>低成本：采用通用元器件，降低采购与维护成本</li>
-            <li>全功能：集采集、控制、显示、通信、指示于一体</li>
-            <li>易扩展：预留接口，支持二次开发与功能扩展</li>
-            <li>教学友好：配套完整文档、代码注释、实训案例</li>
+            <li><a href="index.html">首页</a></li>
+            <li><a href="product.html">产品说明书</a></li>
+            <li><a href="tech.html">技术原理</a></li>
+            <li><a href="about.html" class="active">关于项目</a></li>
         </ul>
-
-        <h2>三、适用场景</h2>
-        <p>高校自动化、电气工程、物联网、嵌入式等专业课程实训；课程设计、毕业设计、学科竞赛；企业岗前技能培训。</p>
-
-        <h2>四、团队与致谢</h2>
-        <p>本项目由河北地质大学信息工程学院学生团队独立设计、开发与测试。感谢指导教师在方案设计、硬件选型、软件开发过程中的悉心指导与支持。</p>
-
-        <h2>五、开源与版权</h2>
-        <p>本项目硬件设计与软件代码仅供教学学习使用，未经授权不得用于商业用途。欢迎学习交流与二次开发，引用请注明来源。</p>
     </div>
-    <footer>
-        <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
-    </footer>
+    <div class="main">
+        <header>
+            <h1>关于项目与团队 - PCT-100</h1>
+        </header>
+        <nav>
+            <a href="index.html">首页</a>
+            <a href="product.html">产品说明书</a>
+            <a href="tech.html">技术原理</a>
+            <a href="about.html">关于项目</a>
+        </nav>
+        <div class="container">
+            <h2>一、项目背景</h2>
+            <p>化工自动化与物联网技术发展迅速，高校教学亟需低成本、高集成、易上手的实训平台。PCT-100 旨在填补教学设备缺口，覆盖嵌入式、传感器、自动控制、物联网通信等核心知识点，满足课程设计、实训教学与竞赛需求。</p>
+
+            <h2>二、项目目标</h2>
+            <ul>
+                <li>低成本：采用通用元器件，降低采购与维护成本</li>
+                <li>全功能：集采集、控制、显示、通信、指示于一体</li>
+                <li>易扩展：预留接口，支持二次开发与功能扩展</li>
+                <li>教学友好：配套完整文档、代码注释、实训案例</li>
+            </ul>
+
+            <h2>三、适用场景</h2>
+            <p>高校自动化、电气工程、物联网、嵌入式等专业课程实训；课程设计、毕业设计、学科竞赛；企业岗前技能培训。</p>
+
+            <h2>四、团队与致谢</h2>
+            <p>本项目由河北地质大学信息工程学院学生团队独立设计、开发与测试。感谢指导教师在方案设计、硬件选型、软件开发过程中的悉心指导与支持。</p>
+
+            <h2>五、开源与版权</h2>
+            <p>本项目硬件设计与软件代码仅供教学学习使用，未经授权不得用于商业用途。欢迎学习交流与二次开发，引用请注明来源。</p>
+        </div>
+        <footer>
+            <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
+        </footer>
+    </div>
+    <button id="themeToggle">切换浅色模式</button>
+    <script src="theme.js"></script>
 </body>
 </html>
