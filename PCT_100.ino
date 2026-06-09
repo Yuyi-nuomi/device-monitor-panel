@@ -14,11 +14,11 @@
 #include <Preferences.h>
 #include "secrets.h"
 
-// ========== WS2812配置 ==========
+// ========== WS2812 彩灯配置 ==========
 #define WS2812_PIN 0
 #define LED_NUM 1
 CRGB rgbLed[LED_NUM];
-// ===============================
+// ====================================
 
 #define ONE_WIRE_BUS 10
 OneWire oneWire(ONE_WIRE_BUS);
@@ -35,10 +35,9 @@ U8G2_SH1106_128X64_VCOMH0_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 #define LIGHT_HYSTERESIS 60
 #define LIGHT_FILTER_SIZE 5
 
-// ====================== 【修复点1】阈值改为全局变量 ======================
+// 阈值全局变量
 int LIGHT_THRESHOLD_LUX = 300;
 float TEMP_THRESHOLD_C = 30.0;
-// ======================================================================
 
 uint8_t auto_mode = 1;
 float lastTempC = 0;
@@ -53,7 +52,7 @@ IPAddress local_IP;
 String targetSSID = "";
 String targetPWD = "";
 
-//WiFi重连参数
+// WiFi重连参数
 unsigned long wifiReconnectTimer = 0;
 const unsigned long RECONNECT_INTERVAL = 3000;
 const unsigned long SHOW_FAIL_TIME = 5000;
@@ -65,6 +64,20 @@ unsigned long disconnectStartDisp = 0;
 #define EEPROM_PWD_ADDR 33
 const char WIFI_FLAG = 0xAB;
 
+// ===================== 多彩灯 全局状态变量（新增） =====================
+bool mqtt_ok = true;
+unsigned long rgb_run_timer = 0;
+uint8_t rgb_work_mode = 0;
+uint8_t rgb_step = 0;
+
+// 渐变动画变量
+uint8_t grad_sr=0, grad_sg=0, grad_sb=0;
+uint8_t grad_er=0, grad_eg=0, grad_eb=0;
+unsigned long grad_start_time=0;
+uint16_t grad_dur=0;
+bool is_gradual = false;
+// ======================================================================
+
 int rssiToPercent(int rssi) {
   if (rssi >= -60) return 100;
   if (rssi <= -90) return 0;
@@ -75,13 +88,13 @@ void clearSerialBuffer() {
   while (Serial.available()) Serial.read();
 }
 
-// ========== RGB 函数 ==========
+// ========== RGB 基础控制函数 ==========
 void setRGB(uint8_t r, uint8_t g, uint8_t b) {
   rgbLed[0] = CRGB(r, g, b);
   FastLED.show();
 }
 
-// 开机红绿闪烁3次 → 熄灭
+// 开机红绿闪烁3次
 void rgbBootBlink() {
   for (int i = 0; i < 3; i++) {
     setRGB(255, 0, 0); delay(300);
@@ -90,7 +103,168 @@ void rgbBootBlink() {
   setRGB(0, 0, 0);
 }
 
-// ====================== [MQTT] =====================
+// 启动渐变动画
+void rgbGradualStart(uint16_t dur, uint8_t sr, uint8_t sg, uint8_t sb, uint8_t er, uint8_t eg, uint8_t eb) {
+  grad_sr = sr; grad_sg = sg; grad_sb = sb;
+  grad_er = er; grad_eg = eg; grad_eb = eb;
+  grad_dur = dur;
+  grad_start_time = millis();
+  is_gradual = true;
+}
+
+// 渐变动画刷新（非阻塞），返回true代表渐变完成
+bool rgbGradualUpdate() {
+  if(!is_gradual) return true;
+  unsigned long elapsed = millis() - grad_start_time;
+  if(elapsed >= grad_dur) {
+    setRGB(grad_er, grad_eg, grad_eb);
+    is_gradual = false;
+    return true;
+  }
+  float ratio = (float)elapsed / grad_dur;
+  uint8_t r = grad_sr + (grad_er - grad_sr) * ratio;
+  uint8_t g = grad_sg + (grad_eg - grad_sg) * ratio;
+  uint8_t b = grad_sb + (grad_eb - grad_sb) * ratio;
+  setRGB(r, g, b);
+  return false;
+}
+
+// ===================== 多彩灯主状态机（核心逻辑） =====================
+void rgbTask(){
+  bool fan_state = (lastTempC > TEMP_THRESHOLD_C);
+  bool led_on_flag = (led_state == HIGH);
+  // 计算光照越界标志
+  int lightVal = analogRead(LIGHT_PIN);
+  float lux = (float)(4095 - lightVal) * (4095 - lightVal) / 30000.0f;
+  bool light_alarm = (lux < LIGHT_THRESHOLD_LUX);
+  bool temp_alarm = fan_state;
+
+  static uint8_t last_mode = 0;
+  uint8_t new_mode = 0;
+
+  if(system_enabled){
+    // 优先级：严重警报 > 光照报警 > 温度报警 > MQTT离线 > WiFi离线 > 正常
+    if(led_on_flag && fan_state){
+      new_mode = 1;  // 1. LED+风扇同时开启 → 严重警报
+    }else if(led_on_flag && !fan_state && light_alarm){
+      new_mode = 2;  // 2. 仅LED亮、光照越界
+    }else if(!led_on_flag && fan_state && temp_alarm){
+      new_mode = 3;  // 3. 仅风扇转、温度越界
+    }else if(!mqtt_ok){
+      new_mode = 4;  // 4. MQTT 未连接
+    }else if(!wifi_connected){
+      new_mode = 5;  // 5. WiFi 未连接
+    }else{
+      new_mode = 6;  // 6. 所有状态正常
+    }
+  }else{
+    // 系统关闭 → 彩灯全灭，重置状态
+    setRGB(0,0,0);
+    rgb_step=0;
+    rgb_run_timer=millis();
+    is_gradual=false;
+    last_mode=0;
+    rgb_work_mode=0;
+    return;
+  }
+
+  // 模式切换时重置状态机
+  if(new_mode != last_mode){
+    rgb_step = 0;
+    rgb_run_timer = millis();
+    is_gradual = false;
+    rgb_work_mode = new_mode;
+    last_mode = new_mode;
+  }
+
+  unsigned long now = millis();
+  // 优先处理渐变动画
+  if(is_gradual){
+    if(rgbGradualUpdate()){
+      rgb_step++;
+    }
+    return;
+  }
+
+  // 6种模式状态机
+  switch(rgb_work_mode){
+    case 1: // 严重警报：红100ms→灭50ms→红100ms→灭50ms→绿100ms→灭50ms→绿100ms→灭50ms→蓝100ms→灭50ms→蓝100ms→灭350ms
+      switch(rgb_step){
+        case 0: setRGB(255,0,0); rgb_run_timer=now; rgb_step++; break;
+        case 1: if(now-rgb_run_timer>=100){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 2: if(now-rgb_run_timer>=50){setRGB(255,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 3: if(now-rgb_run_timer>=100){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 4: if(now-rgb_run_timer>=50){setRGB(0,255,0); rgb_run_timer=now; rgb_step++;} break;
+        case 5: if(now-rgb_run_timer>=100){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 6: if(now-rgb_run_timer>=50){setRGB(0,255,0); rgb_run_timer=now; rgb_step++;} break;
+        case 7: if(now-rgb_run_timer>=100){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 8: if(now-rgb_run_timer>=50){setRGB(0,0,255); rgb_run_timer=now; rgb_step++;} break;
+        case 9: if(now-rgb_run_timer>=100){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 10:if(now-rgb_run_timer>=50){setRGB(0,0,255); rgb_run_timer=now; rgb_step++;} break;
+        case 11:if(now-rgb_run_timer>=100){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 12:if(now-rgb_run_timer>=350){rgb_step=0; rgb_run_timer=now;} break;
+      }
+      break;
+
+    case 2: // 光照越界：红300→灭200→绿300→灭200→蓝300→灭200
+      switch(rgb_step){
+        case 0: setRGB(255,0,0); rgb_run_timer=now; rgb_step++; break;
+        case 1: if(now-rgb_run_timer>=300){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 2: if(now-rgb_run_timer>=200){setRGB(0,255,0); rgb_run_timer=now; rgb_step++;} break;
+        case 3: if(now-rgb_run_timer>=300){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 4: if(now-rgb_run_timer>=200){setRGB(0,0,255); rgb_run_timer=now; rgb_step++;} break;
+        case 5: if(now-rgb_run_timer>=300){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 6: if(now-rgb_run_timer>=200){rgb_step=0; rgb_run_timer=now;} break;
+      }
+      break;
+
+    case 3: // 温度越界：红500→绿500→蓝500→灭700
+      switch(rgb_step){
+        case 0: setRGB(255,0,0); rgb_run_timer=now; rgb_step++; break;
+        case 1: if(now-rgb_run_timer>=500){setRGB(0,255,0); rgb_run_timer=now; rgb_step++;} break;
+        case 2: if(now-rgb_run_timer>=500){setRGB(0,0,255); rgb_run_timer=now; rgb_step++;} break;
+        case 3: if(now-rgb_run_timer>=500){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 4: if(now-rgb_run_timer>=700){rgb_step=0; rgb_run_timer=now;} break;
+      }
+      break;
+
+    case 4: // MQTT未连接：红500ms渐变绿 → 500ms渐变灭 → 500ms渐变蓝 →500ms渐变灭
+      switch(rgb_step){
+        case 0: setRGB(255,0,0); rgbGradualStart(500,255,0,0,0,255,0); rgb_step++; break;
+        case 1: if(rgbGradualUpdate()){rgbGradualStart(500,0,255,0,0,0,0); rgb_step++;} break;
+        case 2: if(rgbGradualUpdate()){rgbGradualStart(500,0,0,0,0,0,255); rgb_step++;} break;
+        case 3: if(rgbGradualUpdate()){rgbGradualStart(500,0,0,255,0,0,0); rgb_step++;} break;
+        case 4: if(rgbGradualUpdate()){rgb_step=0;} break;
+      }
+      break;
+
+    case 5: // WiFi未连接：红200ms → 绿200ms → 全灭500ms
+      switch(rgb_step){
+        case 0: setRGB(255,0,0); rgb_run_timer=now; rgb_step++; break;
+        case 1: if(now-rgb_run_timer>=200){setRGB(0,255,0); rgb_run_timer=now; rgb_step++;} break;
+        case 2: if(now-rgb_run_timer>=200){setRGB(0,0,0); rgb_run_timer=now; rgb_step++;} break;
+        case 3: if(now-rgb_run_timer>=500){rgb_step=0; rgb_run_timer=now;} break;
+      }
+      break;
+
+    case 6: // 全部正常：全灭1s渐变红→1s渐变绿→1s渐变蓝→1s渐变灭→保持200ms
+      switch(rgb_step){
+        case 0: setRGB(0,0,0); rgbGradualStart(1000,0,0,0,255,0,0); rgb_step++; break;
+        case 1: if(rgbGradualUpdate()){rgb_step++;} break;
+        case 2: rgbGradualStart(1000,255,0,0,0,255,0); rgb_step++; break;
+        case 3: if(rgbGradualUpdate()){rgb_step++;} break;
+        case 4: rgbGradualStart(1000,0,255,0,0,0,255); rgb_step++; break;
+        case 5: if(rgbGradualUpdate()){rgb_step++;} break;
+        case 6: rgbGradualStart(1000,0,0,255,0,0,0); rgb_step++; break;
+        case 7: if(rgbGradualUpdate()){rgb_run_timer=now; rgb_step++;} break;
+        case 8: if(now-rgb_run_timer>=200){rgb_step=0;} break;
+      }
+      break;
+  }
+}
+// ======================================================================
+
+// ====================== [MQTT] 原有代码 =====================
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 Preferences prefs;
@@ -120,7 +294,6 @@ void loadMqttConfig() {
   deviceId   = prefs.getString("id", deviceId);
   mqttMode   = prefs.getInt("mode", mqttMode);
 
-  // 加载阈值
   TEMP_THRESHOLD_C = prefs.getFloat("temp_th", 30.0);
   LIGHT_THRESHOLD_LUX = prefs.getInt("light_th", 300);
 
@@ -138,7 +311,6 @@ void saveMqttConfig() {
   prefs.putString("id", deviceId);
   prefs.putInt("mode", mqttMode);
 
-  // 保存阈值
   prefs.putFloat("temp_th", TEMP_THRESHOLD_C);
   prefs.putInt("light_th", LIGHT_THRESHOLD_LUX);
 
@@ -205,7 +377,6 @@ void publishStatus() {
   mqttClient.publish(pubTopic.c_str(), buf);
 }
 
-// ====================== 【修复点2】真正处理上位机阈值下发 ======================
 void mqttCallback(char* topic, byte* payload, unsigned int len) {
   StaticJsonDocument<256> doc;
   if (deserializeJson(doc, payload, len)) return;
@@ -233,7 +404,6 @@ void mqttCallback(char* topic, byte* payload, unsigned int len) {
     else if (strcmp(mode, "manual") == 0) auto_mode = false;
     publishStatus();
   } 
-  // ====================== 阈值修改真正生效 ======================
   else if (strcmp(cmd, "set_threshold") == 0) {
     if (doc.containsKey("temp")) {
       float t = doc["temp"];
@@ -249,24 +419,36 @@ void mqttCallback(char* topic, byte* payload, unsigned int len) {
         Serial.println("✅ 光照阈值已更新：" + String(LIGHT_THRESHOLD_LUX));
       }
     }
-    saveMqttConfig(); // 保存到Flash，断电不丢
+    saveMqttConfig();
     publishStatus();
   }
 }
-// ============================================================================
 
 void mqttLoop() {
+  // 更新MQTT连接状态（给彩灯判断使用）
+  mqtt_ok = mqttClient.connected() && (WiFi.status() == WL_CONNECTED);
+
   if (WiFi.status() != WL_CONNECTED) return;
   if (mqttClient.connected()) {
     mqttClient.loop();
     publishStatus();
     static unsigned long lastMqttLog = 0;
-    if (millis() - lastMqttLog >= 30000) { lastMqttLog = millis(); Serial.print("[MQTT] connected to "); Serial.print(mqttServer); Serial.print(":"); Serial.println(mqttPort); Serial.flush(); }
+    if (millis() - lastMqttLog >= 30000) { 
+      lastMqttLog = millis(); 
+      Serial.print("[MQTT] connected to "); 
+      Serial.print(mqttServer); 
+      Serial.print(":"); 
+      Serial.println(mqttPort); 
+      Serial.flush(); 
+    }
     return;
   }
   if (millis() - lastMqttReconnect < mqttReconnectDelay) return;
   lastMqttReconnect = millis();
-  Serial.print("[MQTT] Connecting to "); Serial.print(mqttServer); Serial.print(":"); Serial.println(mqttPort);
+  Serial.print("[MQTT] Connecting to "); 
+  Serial.print(mqttServer); 
+  Serial.print(":"); 
+  Serial.println(mqttPort);
   Serial.flush();
   String clientId = "ESP32_" + deviceId + "_" + String(random(0xffff), HEX);
   if (mqttClient.connect(clientId.c_str(), mqttUser.c_str(), mqttPass.c_str())) {
@@ -276,7 +458,8 @@ void mqttLoop() {
     Serial.flush();
   } else {
     int st = mqttClient.state();
-    Serial.print("- MQTT failed: "); Serial.print(st);
+    Serial.print("- MQTT failed: "); 
+    Serial.print(st);
     if (st == -2) Serial.println(" (server not responding)");
     else if (st == -4) Serial.println(" (timeout)");
     else if (st >= 1 && st <= 5) Serial.println(" (auth/protocol)");
@@ -284,8 +467,8 @@ void mqttLoop() {
     Serial.flush();
   }
 }
+// ======================================================================
 
-// WiFi 实时状态检测+分级RGB【绿/蓝/黄/红】+自动重连
 void checkWiFiStatus() {
   static unsigned long lastCheck = 0;
   static unsigned long disconnectStart = 0;
@@ -298,21 +481,12 @@ void checkWiFiStatus() {
       disconnectStart = 0;
       disconnectStartDisp = 0;
       wifiReconnectTimer = 0;
-      int rssiPer = rssiToPercent(WiFi.RSSI());
-      if(rssiPer >70){
-        setRGB(0,255,0);
-      }else if(rssiPer>30){
-        setRGB(0,0,255);
-      }else{
-        setRGB(255,255,0);
-      }
     } else {
       if(disconnectStart == 0){
         disconnectStart = millis();
         disconnectStartDisp = millis();
       }
       wifi_connected = false;
-      setRGB(255, 0, 0);
       if(targetSSID!="" && millis()-wifiReconnectTimer>RECONNECT_INTERVAL){
         wifiReconnectTimer = millis();
         Serial.println("WiFi掉线，尝试自动重连...");
@@ -484,6 +658,7 @@ bool connectWiFi() {
 void setup() {
   Serial.begin(115200);
   EEPROM.begin(EEPROM_SIZE);
+  // 初始化WS2812彩灯
   FastLED.addLeds<WS2812,WS2812_PIN,GRB>(rgbLed, LED_NUM);
   FastLED.clear();
   delay(500);
@@ -531,6 +706,7 @@ void loop() {
   checkWiFiStatus();
   parseSerialMqtt();
   mqttLoop();
+  rgbTask();  // 循环执行多彩灯逻辑
   delay(10);
 }
 
