@@ -19,7 +19,7 @@ body{background:var(--bg);color:var(--text);display:flex;transition:0.4s;}
 .sidebar a:hover{background:#274b3c;color:#fff;}
 .sidebar a.active{background:var(--active);color:#fff;}
 .main-wrap{margin-left:260px;width:calc(100% - 260px);}
-.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;}
+.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;box-shadow:0 0 10px #00000020;}
 .top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
 .light .top-nav a{color:#333;}
 .top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
@@ -37,32 +37,9 @@ th{background:#1f3d32;color:#58ffaa;}
 .light th{background:#e6f9ef;color:#009955;}
 tr:hover{background:#253240;}
 .light tr:hover{background:#f0f9f5;}
-/* 修复后的悬停提示样式 */
-.hl {
-    color: #58ffaa;
-    font-weight: bold;
-    position: relative;
-    cursor: help;
-    display: inline-block;
-    white-space: nowrap;
-}
-.light .hl {
-    color: #009955;
-}
-.hl:hover::after {
-    content: attr(data-tip);
-    position: absolute;
-    left: 0;
-    top: 125%;
-    background: #111;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 6px;
-    white-space: normal;
-    max-width: 340px;
-    z-index: 999;
-    display: block;
-}
+.hl {color:#58ffaa;font-weight:bold;position:relative;cursor:help;display:inline-block;white-space:nowrap;}
+.light .hl {color:#009955;}
+.hl:hover::after {content:attr(data-tip);position:absolute;left:0;top:125%;background:#111;color:#fff;padding:8px 12px;border-radius:6px;white-space:normal;max-width:340px;z-index:999;display:block;}
 footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
 .light footer{color:#333;}
 #toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
@@ -72,23 +49,24 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
 </style>
 </head>
 <body>
+
 <div class="pop" id="welcome">
-    <h3>欢迎查阅PCT100产品说明书V1.6</h3>
-    <p>设备ID：PCT_100_28 | 化工实训专用设备</p>
-    <button onclick="document.getElementById('welcome').style.display='none'">开始浏览</button>
+    <h3>PCT100 产品说明书 V2.0</h3>
+    <p>多线程 | RGB彩灯 | MQTT | 温湿度 | 光敏 | OLED</p>
+    <button onclick="document.getElementById('welcome').style.display='none'">开始阅读</button>
 </div>
 
 <div class="sidebar">
-    <h2>产品说明书目录</h2>
+    <h2>说明书目录</h2>
     <ul>
-        <li><a href="#p1" class="active" data-target="p1">1.产品总览</a></li>
-        <li><a href="#p2" data-target="p2">2.硬件组成明细</a></li>
-        <li><a href="#p3" data-target="p3">3.整机功能介绍</a></li>
-        <li><a href="#p4" data-target="p4">4.整机技术参数</a></li>
-        <li><a href="#p5" data-target="p5">5.源码分层结构</a></li>
-        <li><a href="#p6" data-target="p6">6.上电使用步骤</a></li>
-        <li><a href="#p7" data-target="p7">7.日常保养规范</a></li>
-        <li><a href="#p8" data-target="p8">8.故障排查指南</a></li>
+        <li><a href="#p1" class="active">1.产品总览</a></li>
+        <li><a href="#p2">2.硬件明细</a></li>
+        <li><a href="#p3">3.功能列表</a></li>
+        <li><a href="#p4">4.技术参数</a></li>
+        <li><a href="#p5">5.源码结构</a></li>
+        <li><a href="#p6">6.上电流程</a></li>
+        <li><a href="#p7">7.保养规范</a></li>
+        <li><a href="#p8">8.故障排查</a></li>
     </ul>
 </div>
 
@@ -100,30 +78,37 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
         <a href="about.html">关于项目</a>
         <button id="theme">切换浅色/深色</button>
     </div>
+
     <div class="banner">
-        <h1>PCT_100化工控制实训装置 · 产品说明书 V1.6</h1>
+        <h1>PCT_100 化工控制实训装置 · 说明书 V2.0</h1>
     </div>
+
     <div class="container">
         <section id="p1" class="content-box">
             <h2 class="title-h2">1.产品总览</h2>
-            <p>PCT_100是面向化工自动化、机电一体化专业的教学实训设备，完整模拟工业现场泵阀、开关量控制系统，依托Arduino主控实现本地手动+MQTT远程双模式控制，硬件精简可靠、软件模块化开发，满足课内实训、课程设计、技能考核全场景使用。</p>
+            <p>PCT_100 是基于 ESP32 的化工过程控制教学实训装置，采用 FreeRTOS 多线程实时系统，集成温度采集、光照检测、OLED显示、RGB状态指示、继电器输出、WiFi配网、MQTT物联网远程控制，完全模拟工业化工泵阀控制系统，适合教学实训、课程设计、技能竞赛使用。</p>
         </section>
 
         <section id="p2" class="content-box">
             <h2 class="title-h2">2.硬件组成明细</h2>
             <div class="two-col">
                 <div>
-                    <h3 style="color:#58ffaa;margin-bottom:12px;">IO外设配置</h3>
+                    <h3 style="color:#58ffaa;margin-bottom:12px;">IO 外设</h3>
                     <ul style="padding-left:22px;line-height:2;">
-                        <li>LED状态指示灯：<span class="hl" data-tip="单片机数字输出引脚，高电平点亮指示灯，低电平熄灭">引脚6</span></li>
-                        <li>KEY1：<span class="hl" data-tip="系统启停输入引脚，按键按下拉低电平触发开机">引脚20</span></li>
-                        <li>KEY2：<span class="hl" data-tip="工作模式切换引脚，切换本地/远程控制模式">引脚21</span></li>
-                        <li>RELAY：<span class="hl" data-tip="继电器驱动输出引脚，控制外接电磁阀、化工泵启停">引脚7</span></li>
+                        <li>RGB彩灯：<span class="hl" data-tip="WS2812 全彩LED，用于设备状态可视化">GPIO0</span></li>
+                        <li>光敏传感器：<span class="hl" data-tip="模拟量光照强度采集">GPIO1</span></li>
+                        <li>OLED屏幕：<span class="hl" data-tip="I2C通信，显示温度、光照、WiFi、模式">GPIO4/SDA，GPIO5/SCL</span></li>
+                        <li>温度传感器：<span class="hl" data-tip="DS18B20 数字温度">GPIO10</span></li>
+                        <li>KEY1：<span class="hl" data-tip="系统总开关">GPIO20</span></li>
+                        <li>KEY2：<span class="hl" data-tip="模式/档位/重置WiFi">GPIO21</span></li>
+                        <li>继电器：<span class="hl" data-tip="泵阀控制输出">GPIO7</span></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 style="color:#58ffaa;margin-bottom:12px;">物联网通讯配置</h3>
-                    <p>MQTT服务器：<span class="hl" data-tip="公网云端MQTT服务地址，设备联网后自动接入接收远程指令">47.98.170.18:8081</span><br>设备ID：<span class="hl" data-tip="设备唯一编号，多台实训设备区分标识">PCT_100_28</span></p>
+                    <h3 style="color:#58ffaa;margin-bottom:12px;">物联网配置</h3>
+                    <p>MQTT服务器：<span class="hl" data-tip="公网物联网服务器">47.98.170.18:8081</span><br>
+                    设备ID：<span class="hl">PCT_100_28</span><br>
+                    通信协议：WiFi + MQTT 3.1.1</p>
                 </div>
             </div>
         </section>
@@ -131,82 +116,94 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
         <section id="p3" class="content-box">
             <h2 class="title-h2">3.整机功能介绍</h2>
             <ul style="padding-left:22px;line-height:2;">
-                <li>本地手动模式：无网络依靠按键完成设备启停、继电器通断控制</li>
-                <li>远程物联网模式：MQTT客户端远程下发指令控制输出，设备实时上报状态</li>
-                <li>状态可视化：LED跟随继电器、设备故障同步变化，直观反馈工况</li>
+                <li>✅ 温度实时采集（DS18B20）</li>
+                <li>✅ 光照强度模拟采集（光敏电阻）</li>
+                <li>✅ OLED屏幕实时显示：温度/光照/WiFi/模式</li>
+                <li>✅ RGB彩灯10种状态指示：正常/报警/离线/运行</li>
+                <li>✅ 自动模式：阈值自动控制灯光+风扇</li>
+                <li>✅ 手动模式：4档手动控制输出</li>
+                <li>✅ WiFi自动配网 + 掉电记忆</li>
+                <li>✅ MQTT远程控制与状态上报</li>
+                <li>✅ 按键多级逻辑：短按/长按/超长按</li>
             </ul>
         </section>
 
         <section id="p4" class="content-box">
             <h2 class="title-h2">4.整机技术参数</h2>
             <table>
-                <tr><th>项目</th><th>规格</th></tr>
-                <tr><td>固件版本</td><td>V1.6</td></tr>
-                <tr><td>工作电压</td><td>DC5V</td></tr>
-                <tr><td>输入IO</td><td>2路独立按键</td></tr>
-                <tr><td>输出IO</td><td>1路继电器+1路LED</td></tr>
-                <tr><td>通讯协议</td><td>WiFi+MQTT3.1.1</td></tr>
+                <tr><th>项目</th><th>参数</th></tr>
+                <tr><td>主控芯片</td><td>ESP32（RISC-V + 双核）</td></tr>
+                <tr><td>系统架构</td><td>FreeRTOS 多线程</td></tr>
+                <tr><td>工作电压</td><td>DC 5V</td></tr>
+                <tr><td>温度检测</td><td>DS18B20 数字</td></tr>
+                <tr><td>光照检测</td><td>光敏电阻（模拟）</td></tr>
+                <tr><td>显示屏幕</td><td>0.96寸 I2C OLED 128×64</td></tr>
+                <tr><td>输出控制</td><td>1路继电器 + 1路LED</td></tr>
+                <tr><td>通信方式</td><td>WiFi + MQTT</td></tr>
+                <tr><td>固件版本</td><td>V2.0</td></tr>
             </table>
         </section>
 
         <section id="p5" class="content-box">
             <h2 class="title-h2">5.源码分层结构</h2>
             <ul style="padding-left:22px;line-height:2;">
-                <li>led.h / led.cpp：LED底层驱动</li>
-                <li>key.h / key.cpp：按键扫描消抖</li>
-                <li>relay.h / relay.cpp：继电器控制</li>
-                <li>exit.h / exit.cpp：系统复位</li>
-                <li>PCT_100.ino：主逻辑</li>
+                <li>led.h / led.cpp —— LED驱动</li>
+                <li>key.h / key.cpp —— 按键消抖</li>
+                <li>relay.h / relay.cpp —— 继电器控制</li>
+                <li>exit.h / exit.cpp —— 系统复位</li>
+                <li>PCT_100.ino —— 主逻辑（多线程+MQTT+传感器）</li>
             </ul>
         </section>
 
         <section id="p6" class="content-box">
             <h2 class="title-h2">6.上电使用步骤</h2>
             <ol style="padding-left:22px;line-height:2;">
-                <li>设备上电，LED闪烁代表自动连接WiFi</li>
-                <li>联网成功LED常亮，KEY1短按启用整机系统</li>
-                <li>KEY2短按在【本地/远程】模式切换</li>
+                <li>设备上电 → RGB彩灯闪烁启动</li>
+                <li>自动扫描WiFi → 串口配网</li>
+                <li>WiFi连接成功 → OLED显示IP</li>
+                <li>KEY1 短按 → 启动系统</li>
+                <li>KEY2 长按 → 切换自动/手动模式</li>
+                <li>KEY2 短按 → 手动切换输出档位</li>
             </ol>
         </section>
 
         <section id="p7" class="content-box">
             <h2 class="title-h2">7.日常保养规范</h2>
-            <p>避免潮湿、粉尘环境存放；每月检查接线端子紧固，禁止超额定电压供电，闲置存放于干燥避光环境。</p>
+            <p>设备应存放于干燥、无尘、无腐蚀性气体环境；每月检查供电电压与接线端子；禁止带电拔插传感器；长期不使用时断电存放于避光干燥处；继电器与按键为机械损耗件，使用次数≥10万次。</p>
         </section>
 
         <section id="p8" class="content-box">
             <h2 class="title-h2">8.故障排查指南</h2>
             <div class="two-col">
                 <div>
-                    <p>✅ LED不亮：检查供电与引脚</p>
-                    <p>✅ 按键无反应：检查IO接线</p>
+                    <p>🔹 WiFi无法连接：长按KEY2重置</p>
+                    <p>🔹 温度不显示：检查DS18B20接线</p>
+                    <p>🔹 OLED不亮：检查I2C接线</p>
                 </div>
                 <div>
-                    <p>✅ MQTT连接失败：核对WiFi/服务器</p>
-                    <p>✅ 继电器不动作：检查负载接线</p>
+                    <p>🔹 MQTT离线：检查网络与服务器</p>
+                    <p>🔹 按键无反应：检查GPIO接线</p>
+                    <p>🔹 继电器不动作：检查供电与负载</p>
                 </div>
             </div>
         </section>
     </div>
 
     <button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
-    <div id="timeBox">页面已运行：<span id="sec">0</span> s</div>
-    <footer>©2026 PCT100化工实训装置 | 官方产品说明书</footer>
+    <div id="timeBox">页面运行：<span id="sec">0</span> s</div>
+    <footer>©2025 PCT100化工实训装置 | 产品说明书 V2.0</footer>
 </div>
 
 <script>
 window.onload=()=>document.getElementById("welcome").style.display="block";
-//换肤
 document.getElementById("theme").onclick=()=>document.body.classList.toggle("light");
-//计时
 let s=0;setInterval(()=>{s++;document.getElementById("sec").innerText=s},1000);
-//侧边栏滚动高亮
 const links=document.querySelectorAll(".sidebar a");
 const sections=document.querySelectorAll("section");
 window.onscroll=()=>{
     let current="";
     sections.forEach(sec=>{const top=sec.offsetTop;if(window.scrollY>=top-200)current=sec.id;});
-    links.forEach(link=>{link.classList.remove("active");if(link.getAttribute("data-target")===current)link.classList.add("active");});
+    links.forEach(link=>{link.classList.remove("active");if(link.getAttribute("href").substring(1)===current)link.classList.add("active");});
     document.getElementById("toTop").style.display=window.scrollY>300?"block":"none";
 };
 </script>

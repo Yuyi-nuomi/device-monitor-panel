@@ -9,7 +9,7 @@
 :root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;--bg:#0f1822;}
 .light{--bg:#f3f7f9;--dark:#ffffff;--card:#ffffff;--text:#222222;}
 body{background:var(--bg);color:var(--text);transition:0.4s;}
-.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;}
+.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;box-shadow:0 0 10px #00000020;}
 .top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
 .light .top-nav a{color:#333;}
 .top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
@@ -18,7 +18,7 @@ body{background:var(--bg);color:var(--text);transition:0.4s;}
 .content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;}
 .content-box:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.25);}
 .title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:var(--text);}
-.img-box{width:100%;height:250px;border-radius:10px;margin:20px 0;object-fit:cover;}
+.img-box{width:100%;height:280px;border-radius:10px;margin:20px 0;object-fit:cover;}
 footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
 .light footer{color:#444;}
 #toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
@@ -30,8 +30,8 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
 <body>
 
 <div class="pop" id="welcome">
-    <h3>PCT100 技术原理说明</h3>
-    <p>硬件IO + MQTT物联网双模式控制</p>
+    <h3>技术原理说明</h3>
+    <p>多线程 + 传感器 + MQTT + 闭环控制</p>
     <button onclick="document.getElementById('welcome').style.display='none'">确定</button>
 </div>
 
@@ -44,30 +44,75 @@ footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;col
 </div>
 
 <div class="container">
-    <h1 style="text-align:center;color:#58ffaa;margin-bottom:40px;font-size:32px;">PCT_100整机控制技术原理详解</h1>
+    <h1 style="text-align:center;color:#58ffaa;margin-bottom:40px;font-size:32px;">PCT_100 技术原理详解</h1>
     <img class="img-box" src="https://img0.baidu.com/it/u=3821513221,2133658251&fm=253&fmt=auto" alt="控制流程图">
 
     <div class="content-box">
-        <h2 class="title-h2">一、整机闭环控制总体原理</h2>
-        <p>设备完全复刻工业PLC开关控制链路：<b>按键信号采集→主控逻辑运算→继电器输出+LED状态反馈</b>。本地输入来自物理按键，远程输入来自MQTT云端报文，两路输入共用同一套输出执行逻辑，实现双源控制单负载，贴合真实化工车间泵阀控制系统设计思路。</p>
+        <h2 class="title-h2">一、多线程实时系统原理</h2>
+        <p>系统基于 FreeRTOS 实现双线程并行运行：<br>
+        • 线程1：WiFi + MQTT 通信（100ms周期）<br>
+        • 线程2：RGB彩灯状态刷新（10ms周期）<br>
+        线程间使用临界区保护共享变量，实现高实时、不卡顿、工业级稳定运行。
+        </p>
     </div>
+
     <div class="content-box">
-        <h2 class="title-h2">二、按键硬件与软件采集原理</h2>
-        <p>硬件采用IO上拉输入电路，按键按下引脚电平由高变低；软件添加延时消抖算法，过滤机械按键抖动误触发。驱动分层封装按键扫描函数，上层业务无需关注底层电平细节。</p>
+        <h2 class="title-h2">二、传感器采集原理</h2>
+        <p>• DS18B20 温度：单总线数字协议，精度±0.5℃，实时读取温度值。<br>
+        • 光敏电阻：模拟量采集，软件做均值滤波，回算光照强度 lux。<br>
+        • 数据每秒刷新一次，并用于闭环自动控制。
+        </p>
     </div>
+
     <div class="content-box">
-        <h2 class="title-h2">三、继电器与LED驱动原理</h2>
-        <p>主控IO电平驱动三极管导通/截止，控制继电器线圈供电，无源触点通断外接负载，模拟化工离心泵、电磁阀启停；LED与继电器状态绑定，实现设备状态全可视化。</p>
+        <h2 class="title-h2">三、闭环自动控制原理</h2>
+        <p>自动模式下：<br>
+        1. 光照低于阈值 → 自动开灯<br>
+        2. 温度高于阈值 → 自动开风扇<br>
+        3. 状态变化 → 立即上传MQTT<br>
+        4. OLED实时显示控制状态<br>
+        完全复刻工业PLC闭环控制逻辑。
+        </p>
     </div>
+
     <div class="content-box">
-        <h2 class="title-h2">四、MQTT物联网通讯原理</h2>
-        <p>设备上电自动连接WiFi，TCP长连接接入公网MQTT Broker，订阅专属控制主题、发布设备状态主题，实现工业级低功耗双向通信。</p>
+        <h2 class="title-h2">四、按键多级逻辑原理</h2>
+        <p>KEY1：系统总开关，控制全局使能。<br>
+        KEY2：<br>
+        • 短按（<2秒）：手动模式切换4个输出档位<br>
+        • 长按（2~5秒）：切换自动/手动模式<br>
+        • 超长按（>5秒）：清除WiFi信息并重启<br>
+        一套按键实现三级功能，高效简洁。
+        </p>
+    </div>
+
+    <div class="content-box">
+        <h2 class="title-h2">五、MQTT物联网通信原理</h2>
+        <p>设备作为MQTT客户端：<br>
+        • 订阅指令主题：接收远程控制命令<br>
+        • 发布状态主题：上传温度/光照/输出<br>
+        • 断线自动重连，支持公网服务器<br>
+        • 指令采用JSON格式，稳定可靠。
+        </p>
+    </div>
+
+    <div class="content-box">
+        <h2 class="title-h2">六、RGB彩灯状态指示原理</h2>
+        <p>WS2812全彩LED根据系统状态自动切换：<br>
+        • 模式1：灯+风扇同时运行 → 三色闪烁<br>
+        • 模式2：灯开启 → 红绿交替<br>
+        • 模式3：风扇开启 → 三色渐变<br>
+        • 模式4：MQTT离线 → 渐变呼吸<br>
+        • 模式5：WiFi断开 → 红绿光闪烁<br>
+        • 模式6：正常待机 → 彩虹渐变<br>
+        10种效果直观反映设备工况。
+        </p>
     </div>
 </div>
 
 <button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
-<div id="timeBox">页面已运行：<span id="sec">0</span> s</div>
-<footer>©2026 PCT100化工实训装置 | 技术原理文档</footer>
+<div id="timeBox">页面运行：<span id="sec">0</span> s</div>
+<footer>©2025 PCT100化工实训装置 | 技术原理文档</footer>
 
 <script>
 window.onload=()=>document.getElementById("welcome").style.display="block";
