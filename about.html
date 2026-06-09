@@ -1,111 +1,100 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>关于项目|PCT100化工实训装置</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;scroll-behavior:smooth;}
-:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;--bg:#0f1822;}
-.light{--bg:#f3f7f9;--dark:#ffffff;--card:#ffffff;--text:#222222;}
-body{background:var(--bg);color:var(--text);transition:0.4s;}
-.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;box-shadow:0 0 10px #00000020;}
-.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
-.light .top-nav a{color:#333;}
-.top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
-#theme{margin-left:auto;background:#009955;border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;}
-.container{max-width:1200px;margin:0 auto;padding:55px 30px;}
-.content-box{background:var(--card);padding:35px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;}
-.content-box:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.25);}
-.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:var(--text);}
-.img-box{width:100%;height:280px;border-radius:10px;margin:20px 0;object-fit:cover;}
-footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
-.light footer{color:#444;}
-#toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
-#timeBox{position:fixed;right:30px;bottom:90px;color:var(--text);background:var(--card);padding:8px 12px;border-radius:8px;font-size:14px;}
-.pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#222;padding:30px;border-radius:12px;z-index:9999;display:none;box-shadow:0 0 30px #0003;}
-.pop button{margin-top:15px;background:#009955;border:none;color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于项目 - PCT-100</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.8;
+        }
+        header {
+            background-color: #0f3020;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid #228855;
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 24px;
+        }
+        nav {
+            background-color: #222;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav a {
+            color: #aaa;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        nav a:hover {
+            color: #66dd88;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h2 {
+            color: #66dd88;
+            margin: 30px 0 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        footer {
+            background-color: #222;
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            margin-top: 40px;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <h1>关于项目与团队 - PCT-100</h1>
+    </header>
+    <nav>
+        <a href="index.html">首页</a>
+        <a href="product.html">产品说明书</a>
+        <a href="tech.html">技术原理</a>
+        <a href="about.html">关于项目</a>
+    </nav>
+    <div class="container">
+        <h2>一、项目背景</h2>
+        <p>化工自动化与物联网技术发展迅速，高校教学亟需低成本、高集成、易上手的实训平台。PCT-100 旨在填补教学设备缺口，覆盖嵌入式、传感器、自动控制、物联网通信等核心知识点，满足课程设计、实训教学与竞赛需求。</p>
 
-<div class="pop" id="welcome">
-    <h3>关于 PCT_100 项目</h3>
-    <p>开源 | 教学 | 物联网 | 化工自动化实训平台</p>
-    <button onclick="document.getElementById('welcome').style.display='none'">确定</button>
-</div>
-
-<div class="top-nav">
-    <a href="index.html">首页</a>
-    <a href="product.html">产品说明书</a>
-    <a href="tech.html">技术原理</a>
-    <a href="about.html">关于项目</a>
-    <button id="theme">切换浅色/深色</button>
-</div>
-
-<div class="container">
-    <h1 style="text-align:center;color:#58ffaa;margin-bottom:40px;font-size:32px;">项目开发与应用介绍</h1>
-    <img class="img-box" src="https://img1.baidu.com/it/u=2911558869,3932711215&fm=253&fmt=auto" alt="实训设备实物">
-
-    <div class="content-box">
-        <h2 class="title-h2">一、项目开发背景</h2>
-        <p>传统高校化工自动化实训设备昂贵、笨重、无法进入普通教室，学生难以接触真实工业控制逻辑。PCT_100 使用低成本 ESP32 硬件，开发微型化工过程控制实训台，百元成本即可实现工业级泵阀控制、物联网远程、传感器闭环全套功能。</p>
-    </div>
-
-    <div class="content-box">
-        <h2 class="title-h2">二、适用课程范围</h2>
-        <ul style="padding-left:22px;line-height:2;">
-            <li>《过程控制工程》：闭环控制实训</li>
-            <li>《化工仪表及自动化》：开关量控制实验</li>
-            <li>《物联网应用技术》：MQTT远程控制实训</li>
-            <li>《嵌入式系统开发》：多线程编程实训</li>
-            <li>《电气控制与PLC》：模拟PLC逻辑实训</li>
+        <h2>二、项目目标</h2>
+        <ul>
+            <li>低成本：采用通用元器件，降低采购与维护成本</li>
+            <li>全功能：集采集、控制、显示、通信、指示于一体</li>
+            <li>易扩展：预留接口，支持二次开发与功能扩展</li>
+            <li>教学友好：配套完整文档、代码注释、实训案例</li>
         </ul>
+
+        <h2>三、适用场景</h2>
+        <p>高校自动化、电气工程、物联网、嵌入式等专业课程实训；课程设计、毕业设计、学科竞赛；企业岗前技能培训。</p>
+
+        <h2>四、团队与致谢</h2>
+        <p>本项目由河北地质大学信息工程学院学生团队独立设计、开发与测试。感谢指导教师在方案设计、硬件选型、软件开发过程中的悉心指导与支持。</p>
+
+        <h2>五、开源与版权</h2>
+        <p>本项目硬件设计与软件代码仅供教学学习使用，未经授权不得用于商业用途。欢迎学习交流与二次开发，引用请注明来源。</p>
     </div>
-
-    <div class="content-box">
-        <h2 class="title-h2">三、系统技术亮点</h2>
-        <p>✅ FreeRTOS 多线程实时系统<br>
-        ✅ RGB彩灯状态全可视化<br>
-        ✅ OLED实时显示传感器数据<br>
-        ✅ WiFi自动配网 + 掉电保存<br>
-        ✅ MQTT公网远程控制<br>
-        ✅ 按键三级逻辑<br>
-        ✅ 模块化源码，极易学习与扩展<br>
-        ✅ 工业化工控制真实逻辑
-        </p>
-    </div>
-
-    <div class="content-box">
-        <h2 class="title-h2">四、开发架构与分工</h2>
-        <p>项目采用标准嵌入式分层架构：<br>
-        1. 硬件层：ESP32 + 传感器 + 执行器<br>
-        2. 驱动层：led/key/relay/sensor/mqtt<br>
-        3. 逻辑层：自动控制、手动控制、线程调度<br>
-        4. 应用层：OLED显示、WiFi配网、远程指令<br>
-        5. 网页端：产品官网 + 说明书 + 技术文档
-        </p>
-    </div>
-
-    <div class="content-box">
-        <h2 class="title-h2">五、开源版权说明</h2>
-        <p>PCT_100 项目全部硬件图纸、源码、网页前端均开源免费，仅限高校教学、学习、实验、课程设计使用，**禁止商用售卖**。<br><br>
-        固件持续迭代更新，当前稳定版本：V2.0<br>
-        项目托管：GitHub<br>
-        适用平台：Arduino-ESP32
-        </p>
-    </div>
-</div>
-
-<button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
-<div id="timeBox">页面运行：<span id="sec">0</span> s</div>
-<footer>©2025 PCT100化工实训装置 | 开源教学项目</footer>
-
-<script>
-window.onload=()=>document.getElementById("welcome").style.display="block";
-document.getElementById("theme").onclick=()=>document.body.classList.toggle("light");
-let s=0;setInterval(()=>{s++;document.getElementById("sec").innerText=s},1000);
-window.onscroll=()=>{document.getElementById("toTop").style.display=window.scrollY>300?"block":"none";}
-</script>
+    <footer>
+        <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
+    </footer>
 </body>
 </html>

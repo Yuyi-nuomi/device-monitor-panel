@@ -1,211 +1,120 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>产品说明书|PCT100化工实训装置</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;scroll-behavior:smooth;}
-:root{--main:#009955;--dark:#121c26;--card:#1e2b38;--text:#e8edf2;--active:#00aa60;--bg:#0f1822;}
-.light{--bg:#f3f7f9;--dark:#fff;--card:#fff;--text:#222;}
-body{background:var(--bg);color:var(--text);display:flex;transition:0.4s;}
-.sidebar{width:260px;background:var(--dark);height:100vh;position:fixed;padding:35px 20px;}
-.sidebar h2{color:#58ffaa;font-size:21px;border-bottom:1px solid #2c3c4d;padding-bottom:14px;margin-bottom:30px;}
-.light .sidebar h2{color:#009955;}
-.sidebar ul{list-style:none;}
-.sidebar li{margin:10px 0;}
-.sidebar a{display:block;padding:11px 14px;border-radius:8px;color:#b9c8d8;text-decoration:none;transition:0.3s;}
-.light .sidebar a{color:#333;}
-.sidebar a:hover{background:#274b3c;color:#fff;}
-.sidebar a.active{background:var(--active);color:#fff;}
-.main-wrap{margin-left:260px;width:calc(100% - 260px);}
-.top-nav{background:var(--dark);padding:20px 45px;display:flex;gap:35px;position:sticky;top:0;z-index:99;align-items:center;box-shadow:0 0 10px #00000020;}
-.top-nav a{color:#b9c8d8;text-decoration:none;font-size:17px;padding:6px 12px;border-radius:6px;transition:0.3s;}
-.light .top-nav a{color:#333;}
-.top-nav a:hover{background:var(--main);color:#fff;transform:scale(1.05);}
-#theme{margin-left:auto;background:#009955;border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;}
-.banner{background:linear-gradient(120deg,#153b30,#0c5942);padding:60px 40px;text-align:center;color:#fff;}
-.container{max-width:1200px;margin:0 auto;padding:50px 30px;}
-.content-box{background:var(--card);padding:34px;border-radius:13px;border:1px solid #2c3c4d;margin-bottom:38px;line-height:1.8;transition:0.3s;box-shadow:0 2px 8px #00000012;}
-.content-box:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.25);}
-.title-h2{border-left:6px solid var(--main);padding-left:15px;font-size:25px;margin-bottom:22px;color:var(--text);}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:30px;}
-table{width:100%;border-collapse:collapse;margin-top:16px;}
-th,td{border:1px solid #334558;padding:13px;color:#d1dde8;}
-.light th,.light td{color:#222;border:#ddd;}
-th{background:#1f3d32;color:#58ffaa;}
-.light th{background:#e6f9ef;color:#009955;}
-tr:hover{background:#253240;}
-.light tr:hover{background:#f0f9f5;}
-.hl {color:#58ffaa;font-weight:bold;position:relative;cursor:help;display:inline-block;white-space:nowrap;}
-.light .hl {color:#009955;}
-.hl:hover::after {content:attr(data-tip);position:absolute;left:0;top:125%;background:#111;color:#fff;padding:8px 12px;border-radius:6px;white-space:normal;max-width:340px;z-index:999;display:block;}
-footer{background:var(--dark);text-align:center;padding:32px;margin-top:60px;color:#99aabc;}
-.light footer{color:#333;}
-#toTop{position:fixed;right:30px;bottom:30px;width:50px;height:50px;background:#009955;color:white;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:none;z-index:999;}
-#timeBox{position:fixed;right:30px;bottom:90px;color:var(--text);background:var(--card);padding:8px 12px;border-radius:8px;font-size:14px;box-shadow:0 2px 10px #0002;}
-.pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#222;padding:30px;border-radius:12px;z-index:9999;display:none;box-shadow:0 0 30px #0003;text-align:center;}
-.pop button{margin-top:15px;background:#009955;border:none;color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品说明书 - PCT-100</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.8;
+        }
+        header {
+            background-color: #0f3020;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid #228855;
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 24px;
+        }
+        nav {
+            background-color: #222;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav a {
+            color: #aaa;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        nav a:hover {
+            color: #66dd88;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h2 {
+            color: #66dd88;
+            margin: 30px 0 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        footer {
+            background-color: #222;
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            margin-top: 40px;
+        }
+    </style>
 </head>
 <body>
-
-<div class="pop" id="welcome">
-    <h3>PCT100 产品说明书 V2.0</h3>
-    <p>多线程 | RGB彩灯 | MQTT | 温湿度 | 光敏 | OLED</p>
-    <button onclick="document.getElementById('welcome').style.display='none'">开始阅读</button>
-</div>
-
-<div class="sidebar">
-    <h2>说明书目录</h2>
-    <ul>
-        <li><a href="#p1" class="active">1.产品总览</a></li>
-        <li><a href="#p2">2.硬件明细</a></li>
-        <li><a href="#p3">3.功能列表</a></li>
-        <li><a href="#p4">4.技术参数</a></li>
-        <li><a href="#p5">5.源码结构</a></li>
-        <li><a href="#p6">6.上电流程</a></li>
-        <li><a href="#p7">7.保养规范</a></li>
-        <li><a href="#p8">8.故障排查</a></li>
-    </ul>
-</div>
-
-<div class="main-wrap">
-    <div class="top-nav">
+    <header>
+        <h1>PCT-100 化工控制实训装置 — 产品说明书</h1>
+    </header>
+    <nav>
         <a href="index.html">首页</a>
         <a href="product.html">产品说明书</a>
         <a href="tech.html">技术原理</a>
         <a href="about.html">关于项目</a>
-        <button id="theme">切换浅色/深色</button>
-    </div>
-
-    <div class="banner">
-        <h1>PCT_100 化工控制实训装置 · 说明书 V2.0</h1>
-    </div>
-
+    </nav>
     <div class="container">
-        <section id="p1" class="content-box">
-            <h2 class="title-h2">1.产品总览</h2>
-            <p>PCT_100 是基于 ESP32 的化工过程控制教学实训装置，采用 FreeRTOS 多线程实时系统，集成温度采集、光照检测、OLED显示、RGB状态指示、继电器输出、WiFi配网、MQTT物联网远程控制，完全模拟工业化工泵阀控制系统，适合教学实训、课程设计、技能竞赛使用。</p>
-        </section>
+        <h2>一、产品概述</h2>
+        <p>PCT-100 是一套基于 ESP32-C3 的化工过程控制实训装置，面向高校自动化、物联网、嵌入式教学。实现温度、光照采集与自动控制、WiFi-MQTT 远程监控、OLED 显示、RGB 状态指示、按键操作等一体化功能。</p>
 
-        <section id="p2" class="content-box">
-            <h2 class="title-h2">2.硬件组成明细</h2>
-            <div class="two-col">
-                <div>
-                    <h3 style="color:#58ffaa;margin-bottom:12px;">IO 外设</h3>
-                    <ul style="padding-left:22px;line-height:2;">
-                        <li>RGB彩灯：<span class="hl" data-tip="WS2812 全彩LED，用于设备状态可视化">GPIO0</span></li>
-                        <li>光敏传感器：<span class="hl" data-tip="模拟量光照强度采集">GPIO1</span></li>
-                        <li>OLED屏幕：<span class="hl" data-tip="I2C通信，显示温度、光照、WiFi、模式">GPIO4/SDA，GPIO5/SCL</span></li>
-                        <li>温度传感器：<span class="hl" data-tip="DS18B20 数字温度">GPIO10</span></li>
-                        <li>KEY1：<span class="hl" data-tip="系统总开关">GPIO20</span></li>
-                        <li>KEY2：<span class="hl" data-tip="模式/档位/重置WiFi">GPIO21</span></li>
-                        <li>继电器：<span class="hl" data-tip="泵阀控制输出">GPIO7</span></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 style="color:#58ffaa;margin-bottom:12px;">物联网配置</h3>
-                    <p>MQTT服务器：<span class="hl" data-tip="公网物联网服务器">47.98.170.18:8081</span><br>
-                    设备ID：<span class="hl">PCT_100_28</span><br>
-                    通信协议：WiFi + MQTT 3.1.1</p>
-                </div>
-            </div>
-        </section>
+        <h2>二、硬件组成</h2>
+        <ul>
+            <li>主控：ESP32-C3（WiFi+蓝牙）</li>
+            <li>温度采集：DS18B20 数字温度传感器</li>
+            <li>光照采集：光敏电阻模块</li>
+            <li>显示：0.96 寸 I2C OLED</li>
+            <li>状态指示：RGB 彩灯（6 种状态色）</li>
+            <li>执行器：风扇、LED 灯</li>
+            <li>输入：独立按键×3</li>
+            <li>通信：WiFi 2.4GHz、MQTT</li>
+        </ul>
 
-        <section id="p3" class="content-box">
-            <h2 class="title-h2">3.整机功能介绍</h2>
-            <ul style="padding-left:22px;line-height:2;">
-                <li>✅ 温度实时采集（DS18B20）</li>
-                <li>✅ 光照强度模拟采集（光敏电阻）</li>
-                <li>✅ OLED屏幕实时显示：温度/光照/WiFi/模式</li>
-                <li>✅ RGB彩灯10种状态指示：正常/报警/离线/运行</li>
-                <li>✅ 自动模式：阈值自动控制灯光+风扇</li>
-                <li>✅ 手动模式：4档手动控制输出</li>
-                <li>✅ WiFi自动配网 + 掉电记忆</li>
-                <li>✅ MQTT远程控制与状态上报</li>
-                <li>✅ 按键多级逻辑：短按/长按/超长按</li>
-            </ul>
-        </section>
+        <h2>三、功能说明</h2>
+        <p><strong>1. 数据采集</strong><br>温度、光照实时采集，OLED 每秒刷新，本地可查看实时值。</p>
+        <p><strong>2. 自动控制</strong><br>温度高于阈值自动开风扇；光照低于阈值自动补光；支持本地按键或远程修改阈值。</p>
+        <p><strong>3. MQTT 远程监控</strong><br>连接 MQTT 服务器，定时上传温度/光照/设备状态；支持远程下发指令：启停、模式切换、阈值设置、风扇/灯控制。</p>
+        <p><strong>4. RGB 状态显示</strong><br>绿色：正常运行；红色：温度报警；蓝色：WiFi 未连接；黄色：MQTT 离线；青色：风扇开启；紫色：灯光开启。</p>
+        <p><strong>5. 按键操作</strong><br>K1：系统启停；K2：自动/手动切换；K3：阈值档位调节；长按 K3 可重置 WiFi 配置。</p>
 
-        <section id="p4" class="content-box">
-            <h2 class="title-h2">4.整机技术参数</h2>
-            <table>
-                <tr><th>项目</th><th>参数</th></tr>
-                <tr><td>主控芯片</td><td>ESP32（RISC-V + 双核）</td></tr>
-                <tr><td>系统架构</td><td>FreeRTOS 多线程</td></tr>
-                <tr><td>工作电压</td><td>DC 5V</td></tr>
-                <tr><td>温度检测</td><td>DS18B20 数字</td></tr>
-                <tr><td>光照检测</td><td>光敏电阻（模拟）</td></tr>
-                <tr><td>显示屏幕</td><td>0.96寸 I2C OLED 128×64</td></tr>
-                <tr><td>输出控制</td><td>1路继电器 + 1路LED</td></tr>
-                <tr><td>通信方式</td><td>WiFi + MQTT</td></tr>
-                <tr><td>固件版本</td><td>V2.0</td></tr>
-            </table>
-        </section>
+        <h2>四、电气与接口</h2>
+        <p>供电：DC 5V/1A；接口：USB-C、传感器接口、执行器接口、I2C 接口。</p>
 
-        <section id="p5" class="content-box">
-            <h2 class="title-h2">5.源码分层结构</h2>
-            <ul style="padding-left:22px;line-height:2;">
-                <li>led.h / led.cpp —— LED驱动</li>
-                <li>key.h / key.cpp —— 按键消抖</li>
-                <li>relay.h / relay.cpp —— 继电器控制</li>
-                <li>exit.h / exit.cpp —— 系统复位</li>
-                <li>PCT_100.ino —— 主逻辑（多线程+MQTT+传感器）</li>
-            </ul>
-        </section>
+        <h2>五、使用步骤</h2>
+        <ul>
+            <li>1. 连接电源，OLED 显示开机信息</li>
+            <li>2. 首次使用长按 K3，进入 WiFi 配网模式</li>
+            <li>3. 配网成功后自动连接 MQTT</li>
+            <li>4. 本地按键或远程平台监控控制</li>
+        </ul>
 
-        <section id="p6" class="content-box">
-            <h2 class="title-h2">6.上电使用步骤</h2>
-            <ol style="padding-left:22px;line-height:2;">
-                <li>设备上电 → RGB彩灯闪烁启动</li>
-                <li>自动扫描WiFi → 串口配网</li>
-                <li>WiFi连接成功 → OLED显示IP</li>
-                <li>KEY1 短按 → 启动系统</li>
-                <li>KEY2 长按 → 切换自动/手动模式</li>
-                <li>KEY2 短按 → 手动切换输出档位</li>
-            </ol>
-        </section>
-
-        <section id="p7" class="content-box">
-            <h2 class="title-h2">7.日常保养规范</h2>
-            <p>设备应存放于干燥、无尘、无腐蚀性气体环境；每月检查供电电压与接线端子；禁止带电拔插传感器；长期不使用时断电存放于避光干燥处；继电器与按键为机械损耗件，使用次数≥10万次。</p>
-        </section>
-
-        <section id="p8" class="content-box">
-            <h2 class="title-h2">8.故障排查指南</h2>
-            <div class="two-col">
-                <div>
-                    <p>🔹 WiFi无法连接：长按KEY2重置</p>
-                    <p>🔹 温度不显示：检查DS18B20接线</p>
-                    <p>🔹 OLED不亮：检查I2C接线</p>
-                </div>
-                <div>
-                    <p>🔹 MQTT离线：检查网络与服务器</p>
-                    <p>🔹 按键无反应：检查GPIO接线</p>
-                    <p>🔹 继电器不动作：检查供电与负载</p>
-                </div>
-            </div>
-        </section>
+        <h2>六、维护与注意</h2>
+        <p>避免强静电、潮湿环境；传感器轻拿轻放；定期检查接线与供电。</p>
     </div>
-
-    <button id="toTop" onclick="window.scrollTo(0,0)">↑</button>
-    <div id="timeBox">页面运行：<span id="sec">0</span> s</div>
-    <footer>©2025 PCT100化工实训装置 | 产品说明书 V2.0</footer>
-</div>
-
-<script>
-window.onload=()=>document.getElementById("welcome").style.display="block";
-document.getElementById("theme").onclick=()=>document.body.classList.toggle("light");
-let s=0;setInterval(()=>{s++;document.getElementById("sec").innerText=s},1000);
-const links=document.querySelectorAll(".sidebar a");
-const sections=document.querySelectorAll("section");
-window.onscroll=()=>{
-    let current="";
-    sections.forEach(sec=>{const top=sec.offsetTop;if(window.scrollY>=top-200)current=sec.id;});
-    links.forEach(link=>{link.classList.remove("active");if(link.getAttribute("href").substring(1)===current)link.classList.add("active");});
-    document.getElementById("toTop").style.display=window.scrollY>300?"block":"none";
-};
-</script>
+    <footer>
+        <p>PCT-100 化工控制实训装置 | 河北地质大学</p>
+    </footer>
 </body>
 </html>
